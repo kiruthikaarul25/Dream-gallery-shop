@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Client Login — Dream Gallery Photography</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@300;400;600&family=Raleway:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Raleway', sans-serif;
+            background: #080808;
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* subtle bg */
+        body::before {
+            content: '';
+            position: fixed; inset: 0;
+            background: url('https://images.unsplash.com/photo-1519741497674-611481863552?w=1200&auto=format&fit=crop') center/cover no-repeat;
+            opacity: 0.04;
+            pointer-events: none;
+        }
+
+        .login-wrap {
+            width: 100%;
+            max-width: 420px;
+            position: relative; z-index: 1;
+        }
+
+        /* BRAND */
+        .brand {
+            text-align: center;
+            margin-bottom: 36px;
+        }
+        .brand-dots {
+            display: flex; justify-content: center; gap: 6px; margin-bottom: 16px;
+        }
+        .brand-dots span {
+            width: 5px; height: 5px; border-radius: 50%;
+            background: rgba(212,175,55,0.4);
+        }
+        .brand-dots span:nth-child(2) { background: #D4AF37; }
+        .brand h1 {
+            font-family: 'Cinzel', serif;
+            font-size: clamp(1.6rem, 5vw, 2rem);
+            font-weight: 300; color: #fff; letter-spacing: 6px;
+        }
+        .brand h1 span { color: #D4AF37; }
+        .brand p {
+            font-family: 'Raleway', sans-serif;
+            color: #444; font-size: 0.68rem;
+            letter-spacing: 5px; text-transform: uppercase; margin-top: 6px;
+        }
+
+        /* CARD */
+        .card {
+            background: #0e0e0e;
+            border: 1px solid rgba(212,175,55,0.18);
+            border-radius: 22px;
+            padding: 40px 36px;
+            position: relative; overflow: hidden;
+        }
+        .card::before {
+            content: '';
+            position: absolute; top: 0; left: 20%; right: 20%; height: 1px;
+            background: linear-gradient(to right, transparent, #D4AF37, transparent);
+        }
+        @media(max-width:480px) { .card { padding: 30px 22px; } }
+
+        .card-eyebrow {
+            font-size: 0.65rem; letter-spacing: 4px;
+            text-transform: uppercase; color: #D4AF37;
+            margin-bottom: 8px;
+        }
+        .card h2 {
+            font-family: 'Cinzel', serif;
+            font-size: 1.5rem; font-weight: 300;
+            color: #fff; letter-spacing: 3px; margin-bottom: 6px;
+        }
+        .card .subtitle {
+            color: #444; font-size: 0.8rem;
+            font-weight: 300; margin-bottom: 32px; line-height: 1.6;
+        }
+
+        /* ERROR */
+        .error-msg {
+            display: flex; align-items: center; gap: 10px;
+            background: rgba(231,76,60,0.07);
+            border: 1px solid rgba(231,76,60,0.25);
+            border-radius: 12px; padding: 12px 16px;
+            color: #e74c3c; font-size: 0.8rem;
+            margin-bottom: 22px; line-height: 1.5;
+        }
+        .error-msg i { font-size: 1.1rem; flex-shrink: 0; }
+
+        /* FIELDS */
+        .field { margin-bottom: 18px; }
+        .field label {
+            display: block; font-size: 0.68rem;
+            letter-spacing: 2px; text-transform: uppercase;
+            color: #555; margin-bottom: 8px;
+        }
+        .input-wrap {
+            position: relative;
+        }
+        .input-wrap i {
+            position: absolute; left: 14px; top: 50%;
+            transform: translateY(-50%);
+            color: #444; font-size: 1rem; pointer-events: none;
+            transition: color 0.3s;
+        }
+        .field input {
+            width: 100%;
+            background: #080808;
+            border: 1px solid rgba(212,175,55,0.15);
+            border-radius: 12px;
+            padding: 13px 16px 13px 42px;
+            color: #fff;
+            font-family: 'Raleway', sans-serif;
+            font-size: 0.88rem; font-weight: 300;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        .field input::placeholder { color: #333; }
+        .field input:focus { border-color: rgba(212,175,55,0.5); }
+        .field input:focus + i,
+        .input-wrap:focus-within i { color: #D4AF37; }
+
+        /* LOGIN BTN */
+        .btn-login {
+            width: 100%; margin-top: 10px;
+            padding: 14px;
+            background: transparent;
+            border: 1px solid rgba(212,175,55,0.5);
+            color: #D4AF37; border-radius: 40px;
+            font-family: 'Cinzel', serif;
+            font-size: 0.75rem; letter-spacing: 3px;
+            text-transform: uppercase; cursor: pointer;
+            transition: all 0.35s;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .btn-login:hover {
+            background: #D4AF37; color: #000;
+            border-color: #D4AF37;
+        }
+        .btn-login i { font-size: 1rem; }
+
+        /* BACK LINK */
+        .back-link {
+            text-align: center; margin-top: 24px;
+        }
+        .back-link a {
+            color: #333; text-decoration: none;
+            font-size: 0.75rem; letter-spacing: 2px;
+            text-transform: uppercase;
+            display: inline-flex; align-items: center; gap: 6px;
+            transition: color 0.3s;
+        }
+        .back-link a:hover { color: #D4AF37; }
+        .back-link a i { font-size: 0.9rem; }
+
+        /* gold divider */
+        .gold-line {
+            width: 40px; height: 1px;
+            background: linear-gradient(to right, transparent, #D4AF37, transparent);
+            margin: 0 auto 28px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="login-wrap">
+
+    <!-- BRAND -->
+    <div class="brand">
+        <div class="brand-dots">
+            <span></span><span></span><span></span>
+        </div>
+        <h1>Dream <span>Gallery</span></h1>
+        <p>Photography &amp; Cinematography</p>
+    </div>
+
+    <!-- CARD -->
+    <div class="card">
+        <p class="card-eyebrow">Client Portal</p>
+        <h2>Welcome Back</h2>
+        <p class="subtitle" th:text="${coupleName != null} ? 'Welcome, ' + ${coupleName} + '. Enter your credentials below.' : 'Enter your credentials to view your gallery.'">
+            Enter your credentials to view your gallery.
+        </p>
+
+        <div class="gold-line"></div>
+
+        <!-- Error -->
+        <div class="error-msg" th:if="${error}">
+            <i class="ti ti-alert-circle"></i>
+            <span th:text="${error}">Invalid credentials.</span>
+        </div>
+
+        <!-- Token-based login -->
+        <form th:if="${token != null}" th:action="@{/gallery/login}" method="post">
+            <input type="hidden" name="token" th:value="${token}"/>
+            <div class="field">
+                <label>Username</label>
+                <div class="input-wrap">
+                    <input type="text" name="username" th:value="${token}" required/>
+                    <i class="ti ti-user"></i>
+                </div>
+            </div>
+            <div class="field">
+                <label>Password</label>
+                <div class="input-wrap">
+                    <input type="password" name="password" placeholder="Enter your password" required/>
+                    <i class="ti ti-lock"></i>
+                </div>
+            </div>
+            <button type="submit" class="btn-login">
+                <i class="ti ti-photo"></i> View My Gallery
+            </button>
+        </form>
+
+        <!-- Direct login -->
+        <form th:if="${token == null}" th:action="@{/client/login}" method="post">
+            <div class="field">
+                <label>Username</label>
+                <div class="input-wrap">
+                    <input type="text" name="username" placeholder="Enter your username" required/>
+                    <i class="ti ti-user"></i>
+                </div>
+            </div>
+            <div class="field">
+                <label>Password</label>
+                <div class="input-wrap">
+                    <input type="password" name="password" placeholder="Enter your password" required/>
+                    <i class="ti ti-lock"></i>
+                </div>
+            </div>
+            <button type="submit" class="btn-login">
+                <i class="ti ti-photo"></i> View My Gallery
+            </button>
+        </form>
+    </div>
+
+    <!-- BACK -->
+    <div class="back-link">
+        <a href="/select"><i class="ti ti-arrow-left"></i> Back to Select</a>
+    </div>
+
+</div>
+
+</body>
+</html>

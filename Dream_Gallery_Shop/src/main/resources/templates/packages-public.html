@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Packages — Dream Gallery Photography</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@300;400;600&family=Raleway:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Raleway', sans-serif; background: #080808; color: #fff; overflow-x: hidden; }
+
+        /* ── FIXED SOCIAL ── */
+        .fixed-social { position: fixed; bottom: 90px; right: 18px; display: flex; flex-direction: column; gap: 10px; z-index: 300; }
+        .fixed-social a { width: 46px; height: 46px; border: 1px solid rgba(212,175,55,0.35); background: rgba(8,8,8,0.85); backdrop-filter: blur(12px); display: flex; align-items: center; justify-content: center; color: #D4AF37; font-size: 20px; text-decoration: none; transition: all 0.3s; }
+        .fixed-social a:hover { border-color: #D4AF37; background: rgba(212,175,55,0.12); transform: scale(1.1); }
+
+        /* ── PAGE HERO ── */
+        .page-hero {
+            height: 45vh;
+            position: relative;
+            overflow: hidden;
+            display: flex; align-items: flex-end; justify-content: center;
+            padding-bottom: 48px;
+        }
+        .page-hero-bg {
+            position: absolute; inset: 0;
+            background-image: url('https://images.unsplash.com/photo-1591604466107-ec97de577aff?w=1600&auto=format&fit=crop');
+            background-size: cover; background-position: center top;
+            transform: scale(1.04);
+            animation: subtleZoom 8s ease-in-out forwards;
+        }
+        @keyframes subtleZoom { from { transform: scale(1.04); } to { transform: scale(1.0); } }
+        .page-hero-overlay { position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(8,8,8,0.3) 0%, rgba(8,8,8,0.0) 40%, rgba(8,8,8,0.9) 100%); }
+        .page-hero-content { position: relative; z-index: 2; text-align: center; }
+        .page-hero-tag { font-family: 'Cinzel', serif; font-size: 9px; letter-spacing: 6px; color: #D4AF37; text-transform: uppercase; display: block; margin-bottom: 12px; opacity: 0; animation: fadeUp 1s ease 0.3s forwards; }
+        .page-hero-content h1 { font-family: 'Cinzel', serif; font-size: clamp(2rem, 6vw, 3.6rem); color: #fff; font-weight: 300; letter-spacing: 6px; opacity: 0; animation: fadeUp 1s ease 0.6s forwards; }
+        .page-hero-content h1 span { color: #D4AF37; }
+        .hero-gold-line { width: 40px; height: 1px; background: #D4AF37; margin: 14px auto 0; opacity: 0; animation: fadeUp 1s ease 0.9s forwards; }
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* ── SECTION ── */
+        .section { padding: 70px 20px; }
+        .section-inner { max-width: 1000px; margin: 0 auto; }
+        .sec-tag { font-family: 'Cinzel', serif; font-size: 9px; letter-spacing: 5px; color: #D4AF37; text-transform: uppercase; opacity: 0.7; display: block; margin-bottom: 10px; text-align: center; }
+        .sec-title { font-family: 'Cinzel', serif; font-size: clamp(1.3rem, 3.5vw, 1.9rem); color: #e8e0d5; font-weight: 300; letter-spacing: 3px; text-align: center; margin-bottom: 8px; }
+        .sec-line { width: 40px; height: 1px; background: #D4AF37; margin: 14px auto 50px; }
+
+        /* ── PACKAGES GRID ── */
+        .pkg-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+        @media(max-width: 750px) { .pkg-grid { grid-template-columns: 1fr; } }
+        @media(min-width: 751px) and (max-width: 960px) { .pkg-grid { grid-template-columns: repeat(2,1fr); } }
+
+        .pkg-card {
+            border: 1px solid rgba(212,175,55,0.12);
+            padding: 36px 28px 32px;
+            position: relative;
+            overflow: hidden;
+            transition: border-color 0.35s, transform 0.35s;
+            display: flex; flex-direction: column;
+        }
+        .pkg-card::after { content:''; position:absolute; top:0; left:0; right:0; height:1px; background: linear-gradient(90deg, transparent, rgba(212,175,55,0.6), transparent); opacity:0; transition:opacity 0.35s; }
+        .pkg-card:hover { border-color: rgba(212,175,55,0.4); transform: translateY(-6px); }
+        .pkg-card:hover::after { opacity: 1; }
+        .pkg-card.featured { border-color: rgba(212,175,55,0.35); }
+        .pkg-card.featured::after { opacity: 1; }
+
+        .pkg-badge { font-family:'Cinzel',serif; font-size:8px; letter-spacing:3px; text-transform:uppercase; color:#080808; background:#D4AF37; padding:4px 14px; display:inline-block; margin-bottom:24px; align-self:flex-start; }
+
+        .pkg-icon { font-size: 28px; color: rgba(212,175,55,0.4); margin-bottom: 18px; }
+        .pkg-name { font-family:'Cinzel',serif; font-size:1.15rem; letter-spacing:4px; color:#e8e0d5; font-weight:300; margin-bottom:10px; text-transform:uppercase; }
+        .pkg-price { font-family:'Cinzel',serif; font-size:2rem; color:#D4AF37; font-weight:300; margin-bottom:4px; }
+        .pkg-price-sub { font-size:0.72rem; color:rgba(212,175,55,0.5); letter-spacing:2px; text-transform:uppercase; margin-bottom:18px; }
+        .pkg-desc { font-size:0.78rem; color:#555; letter-spacing:1px; line-height:1.8; margin-bottom:22px; padding-bottom:22px; border-bottom:1px solid rgba(255,255,255,0.05); }
+        .pkg-features { list-style:none; margin-bottom:28px; flex:1; }
+        .pkg-features li { font-size:0.76rem; color:#777; padding:7px 0; border-bottom:1px solid rgba(255,255,255,0.04); letter-spacing:1px; display:flex; align-items:center; gap:10px; }
+        .pkg-features li:last-child { border-bottom:none; }
+        .pkg-features li i { color:#D4AF37; font-size:14px; flex-shrink:0; }
+        .pkg-btn { font-family:'Cinzel',serif; font-size:8px; letter-spacing:3px; text-transform:uppercase; padding:12px 24px; border:1px solid rgba(212,175,55,0.4); color:#D4AF37; text-decoration:none; display:block; text-align:center; transition:all 0.3s; margin-top:auto; }
+        .pkg-btn:hover, .pkg-card.featured .pkg-btn { background:#D4AF37; color:#080808; border-color:#D4AF37; }
+        .pkg-card.featured .pkg-btn:hover { background:#c49e30; }
+
+        /* DB dynamic cards */
+        .pkg-card-db { border:1px solid rgba(212,175,55,0.12); padding:32px 26px; position:relative; overflow:hidden; transition:border-color 0.35s, transform 0.35s; }
+        .pkg-card-db::after { content:''; position:absolute; top:0; left:0; right:0; height:1px; background:linear-gradient(90deg,transparent,rgba(212,175,55,0.5),transparent); opacity:0; transition:opacity 0.35s; }
+        .pkg-card-db:hover { border-color:rgba(212,175,55,0.4); transform:translateY(-5px); }
+        .pkg-card-db:hover::after { opacity:1; }
+
+        /* ── CTA STRIP ── */
+        .cta-strip { text-align:center; padding:60px 20px; border-top:1px solid rgba(212,175,55,0.08); }
+        .cta-strip h2 { font-family:'Cinzel',serif; font-size:clamp(1.2rem,3vw,1.7rem); color:#e8e0d5; font-weight:300; letter-spacing:3px; margin-bottom:10px; }
+        .cta-strip p { font-size:0.78rem; color:#555; letter-spacing:2px; margin-bottom:28px; text-transform:uppercase; }
+        .cta-btn { font-family:'Cinzel',serif; font-size:9px; letter-spacing:3px; text-transform:uppercase; padding:14px 40px; background:#D4AF37; color:#080808; text-decoration:none; display:inline-block; transition:background 0.3s; }
+        .cta-btn:hover { background:#c49e30; }
+
+        /* ── BOTTOM NAV ── */
+        .bottom-nav { position:fixed; bottom:0; left:0; right:0; z-index:200; background:rgba(8,8,8,0.92); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); border-top:1px solid rgba(212,175,55,0.15); padding:10px 0 max(10px, env(safe-area-inset-bottom)); }
+        .bottom-nav ul { display:flex; justify-content:space-around; list-style:none; max-width:500px; margin:0 auto; }
+        .bottom-nav ul li a { display:flex; flex-direction:column; align-items:center; gap:4px; text-decoration:none; color:#444; font-family:'Cinzel',serif; font-size:8px; letter-spacing:2px; text-transform:uppercase; transition:color 0.3s; padding:4px 8px; }
+        .bottom-nav ul li a i { font-size:20px; transition:transform 0.3s; }
+        .bottom-nav ul li a:hover i { transform:translateY(-3px); }
+        .bottom-nav ul li a:hover, .bottom-nav ul li a.active { color:#D4AF37; }
+
+        .spacer { height: 80px; }
+        .animate-in { opacity:0; transform:translateY(22px); transition:opacity 0.7s ease, transform 0.7s ease; }
+        .animate-in.visible { opacity:1; transform:translateY(0); }
+        .empty-state { text-align:center; padding:60px 20px; }
+        .empty-state h3 { font-family:'Cinzel',serif; color:#D4AF37; letter-spacing:3px; font-weight:300; margin-bottom:10px; }
+        .empty-state p { color:#555; font-size:0.8rem; letter-spacing:2px; }
+    </style>
+</head>
+<body>
+
+<!-- Fixed Social -->
+<div class="fixed-social">
+    <a href="https://instagram.com/dreamgalleryphoto" target="_blank" aria-label="Instagram"><i class="ti ti-brand-instagram"></i></a>
+    <a href="https://wa.me/919876543210?text=Hi! I'm interested in your photography services." target="_blank" aria-label="WhatsApp"><i class="ti ti-brand-whatsapp"></i></a>
+</div>
+
+<!-- Page Hero -->
+<div class="page-hero">
+    <div class="page-hero-bg"></div>
+    <div class="page-hero-overlay"></div>
+    <div class="page-hero-content">
+        <span class="page-hero-tag">Dream Gallery Photography</span>
+        <h1>Our <span>Packages</span></h1>
+        <div class="hero-gold-line"></div>
+    </div>
+</div>
+
+<!-- Packages Section -->
+<section class="section">
+    <div class="section-inner">
+        <span class="sec-tag">Choose Your Story</span>
+        <h2 class="sec-title">Photography Packages</h2>
+        <div class="sec-line"></div>
+
+        <!-- DB-driven packages (Thymeleaf) -->
+        <div class="pkg-grid" th:if="${packages != null and !#lists.isEmpty(packages)}">
+            <div class="pkg-card-db animate-in" th:each="pkg : ${packages}">
+                <i class="ti ti-camera pkg-icon"></i>
+                <div class="pkg-name" th:text="${pkg.name}"></div>
+                <div class="pkg-price">₹<span th:text="${pkg.price}"></span></div>
+                <div class="pkg-price-sub">onwards</div>
+                <div class="pkg-desc" th:text="${pkg.description}"></div>
+                <a href="/contact" class="pkg-btn">Book Now</a>
+            </div>
+        </div>
+
+        <!-- Fallback static packages when DB is empty -->
+        <div class="pkg-grid" th:if="${packages == null or #lists.isEmpty(packages)}">
+            <!-- Silver -->
+            <div class="pkg-card animate-in">
+                <i class="ti ti-camera pkg-icon"></i>
+                <div class="pkg-name">Silver</div>
+                <div class="pkg-price">₹25,000</div>
+                <div class="pkg-price-sub">onwards</div>
+                <p class="pkg-desc">Perfect for intimate ceremonies and small gatherings.</p>
+                <ul class="pkg-features">
+                    <li><i class="ti ti-check"></i>4 Hours Coverage</li>
+                    <li><i class="ti ti-check"></i>1 Photographer</li>
+                    <li><i class="ti ti-check"></i>200 Edited Photos</li>
+                    <li><i class="ti ti-check"></i>Online Gallery</li>
+                    <li><i class="ti ti-check"></i>USB Delivery</li>
+                </ul>
+                <a href="/contact" class="pkg-btn">Enquire Now</a>
+            </div>
+
+            <!-- Gold -->
+            <div class="pkg-card featured animate-in">
+                <div class="pkg-badge">Most Popular</div>
+                <i class="ti ti-diamond pkg-icon"></i>
+                <div class="pkg-name">Gold</div>
+                <div class="pkg-price">₹55,000</div>
+                <div class="pkg-price-sub">onwards</div>
+                <p class="pkg-desc">Full-day coverage for your complete wedding journey.</p>
+                <ul class="pkg-features">
+                    <li><i class="ti ti-check"></i>Full Day Coverage</li>
+                    <li><i class="ti ti-check"></i>2 Photographers</li>
+                    <li><i class="ti ti-check"></i>500+ Edited Photos</li>
+                    <li><i class="ti ti-check"></i>Cinematic Highlights Reel</li>
+                    <li><i class="ti ti-check"></i>Album (20 Pages)</li>
+                    <li><i class="ti ti-check"></i>Online Gallery</li>
+                </ul>
+                <a href="/contact" class="pkg-btn">Enquire Now</a>
+            </div>
+
+            <!-- Platinum -->
+            <div class="pkg-card animate-in">
+                <i class="ti ti-crown pkg-icon"></i>
+                <div class="pkg-name">Platinum</div>
+                <div class="pkg-price">₹95,000</div>
+                <div class="pkg-price-sub">onwards</div>
+                <p class="pkg-desc">Luxury coverage — every detail, every emotion, forever.</p>
+                <ul class="pkg-features">
+                    <li><i class="ti ti-check"></i>2-Day Coverage</li>
+                    <li><i class="ti ti-check"></i>3 Photographers + Drone</li>
+                    <li><i class="ti ti-check"></i>Unlimited Edited Photos</li>
+                    <li><i class="ti ti-check"></i>Full Cinematic Film</li>
+                    <li><i class="ti ti-check"></i>Premium Album (40 Pages)</li>
+                    <li><i class="ti ti-check"></i>Same-Day Edit</li>
+                    <li><i class="ti ti-check"></i>Pre-Wedding Shoot</li>
+                </ul>
+                <a href="/contact" class="pkg-btn">Enquire Now</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Strip -->
+<div class="cta-strip animate-in">
+    <h2>Need a Custom Package?</h2>
+    <p>We craft experiences tailored just for you</p>
+    <a href="/contact" class="cta-btn">Talk to Us</a>
+</div>
+
+<div class="spacer"></div>
+
+<!-- Bottom Nav -->
+<nav class="bottom-nav">
+    <ul>
+        <li><a href="/"><i class="ti ti-home"></i><span>Home</span></a></li>
+        <li><a href="/work"><i class="ti ti-video"></i><span>Work</span></a></li>
+        <li><a href="/packages-page" class="active"><i class="ti ti-diamond"></i><span>Packages</span></a></li>
+        <li><a href="/contact"><i class="ti ti-phone"></i><span>Contact</span></a></li>
+    </ul>
+</nav>
+
+<script>
+    const obs = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); }), { threshold: 0.08 });
+    document.querySelectorAll('.animate-in').forEach(el => obs.observe(el));
+</script>
+</body>
+</html>

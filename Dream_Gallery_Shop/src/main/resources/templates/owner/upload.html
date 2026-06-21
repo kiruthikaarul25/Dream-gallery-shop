@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Photos — Dream Gallery Photography</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Raleway:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --gold: #c9a84c;
+            --gold-light: #e2c97e;
+            --gold-dim: rgba(201,168,76,0.12);
+            --gold-border: rgba(201,168,76,0.25);
+            --bg: #080808;
+            --surface: #0e0e0e;
+            --surface2: #141414;
+            --surface3: #1c1c1c;
+            --border: rgba(201,168,76,0.2);
+            --text: #e8e0d0;
+            --text-muted: #6a6050;
+            --text-sub: #9a9080;
+            --red: #c0392b;
+            --green: #1a7a4a;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Raleway', sans-serif;
+            min-height: 100vh;
+        }
+
+        /* ── SIDEBAR ── */
+        .sidebar {
+            width: 240px;
+            min-height: 100vh;
+            background: var(--surface);
+            border-right: 1px solid var(--border);
+            padding: 28px 16px;
+            position: fixed;
+            top: 0; left: 0;
+            display: flex;
+            flex-direction: column;
+            z-index: 100;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-brand {
+            font-family: 'Cinzel', serif;
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--gold);
+            letter-spacing: 0.12em;
+            padding: 0 8px 28px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sidebar a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            border-radius: 8px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+            letter-spacing: 0.04em;
+            margin-bottom: 2px;
+            transition: all 0.2s;
+        }
+
+        .sidebar a:hover { background: var(--gold-dim); color: var(--gold); }
+        .sidebar a.active { background: var(--gold-dim); color: var(--gold); border-left: 2px solid var(--gold); }
+
+        .sidebar-logout { margin-top: auto; padding-top: 16px; border-top: 1px solid var(--border); }
+        .sidebar-logout a { color: #c0392b !important; }
+        .sidebar-logout a:hover { background: rgba(192,57,43,0.1) !important; color: #e74c3c !important; }
+
+        /* ── HAMBURGER ── */
+        .hamburger {
+            display: none;
+            position: fixed;
+            top: 16px; left: 16px;
+            z-index: 200;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--gold);
+            width: 40px; height: 40px;
+            border-radius: 8px;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 20px;
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 99;
+        }
+
+        /* ── MAIN ── */
+        .main { margin-left: 240px; padding: 40px 36px; min-height: 100vh; }
+
+        /* ── PAGE HEADER ── */
+        .page-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 28px;
+        }
+
+        .btn-back {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--text-muted);
+            font-family: 'Raleway', sans-serif;
+            font-size: 13px;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .btn-back:hover { border-color: var(--gold); color: var(--gold); }
+
+        .page-title {
+            font-family: 'Cinzel', serif;
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--gold);
+            letter-spacing: 0.08em;
+        }
+
+        /* ── ALERTS ── */
+        .alert {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-size: 13px;
+            margin-bottom: 20px;
+        }
+
+        .alert-success { background: rgba(26,122,74,0.12); border: 1px solid rgba(26,122,74,0.3); color: #52c28a; }
+        .alert-danger  { background: rgba(192,57,43,0.12); border: 1px solid rgba(192,57,43,0.3); color: #e07060; }
+        .alert i { font-size: 16px; }
+
+        /* ── CLIENT CARD ── */
+        .client-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .client-avatar {
+            width: 44px; height: 44px;
+            border-radius: 50%;
+            background: var(--gold-dim);
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--gold);
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .client-name {
+            font-family: 'Cinzel', serif;
+            font-size: 15px;
+            color: var(--gold-light);
+        }
+
+        .client-meta {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 3px;
+        }
+
+        .status-badge {
+            margin-left: auto;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: capitalize;
+            letter-spacing: 0.08em;
+            background: var(--gold-dim);
+            border: 1px solid var(--border);
+            color: var(--gold);
+        }
+
+        /* ── UPLOAD CARD ── */
+        .upload-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            overflow: hidden;
+        }
+
+        .card-top-bar {
+            height: 3px;
+            background: linear-gradient(90deg, var(--gold), transparent);
+        }
+
+        .card-body { padding: 28px; }
+
+        /* ── FORM ELEMENTS ── */
+        .field-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+        }
+
+        .field-label i { color: var(--gold); font-size: 14px; }
+
+        .input-wrap {
+            position: relative;
+            margin-bottom: 24px;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 16px;
+            pointer-events: none;
+        }
+
+        .form-input {
+            width: 100%;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 12px 14px 12px 42px;
+            font-family: 'Raleway', sans-serif;
+            font-size: 14px;
+            color: var(--text);
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .form-input::placeholder { color: var(--text-muted); }
+        .form-input:focus {
+            border-color: var(--gold);
+            box-shadow: 0 0 0 3px rgba(201,168,76,0.08);
+        }
+
+        /* ── DIVIDER ── */
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 4px 0 24px;
+        }
+
+        .divider-line { flex: 1; height: 1px; background: var(--border); }
+        .divider-label {
+            font-size: 10px;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+        }
+
+        /* ── DROP ZONE ── */
+        .drop-zone {
+            border: 2px dashed var(--border);
+            border-radius: 14px;
+            padding: 52px 24px;
+            text-align: center;
+            background: var(--surface2);
+            cursor: pointer;
+            transition: background 0.2s, border-color 0.2s;
+            user-select: none;
+        }
+
+        .drop-zone:hover, .drop-zone.drag-over {
+            background: var(--gold-dim);
+            border-color: var(--gold);
+        }
+
+        .drop-icon {
+            font-size: 40px;
+            color: var(--gold);
+            margin-bottom: 14px;
+        }
+
+        .drop-title {
+            font-family: 'Cinzel', serif;
+            font-size: 14px;
+            color: var(--gold-light);
+            margin-bottom: 8px;
+            letter-spacing: 0.06em;
+        }
+
+        .drop-hint {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        /* ── PREVIEW BAR ── */
+        .preview-bar {
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 16px;
+            padding: 10px 14px;
+            background: var(--gold-dim);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+        }
+
+        .count-text {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--gold);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .clear-btn {
+            font-size: 12px;
+            color: #e07060;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-family: 'Raleway', sans-serif;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            transition: color 0.2s;
+        }
+
+        .clear-btn:hover { color: var(--red); }
+
+        /* ── PREVIEW GRID ── */
+        .preview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+            gap: 10px;
+            margin-top: 14px;
+        }
+
+        .preview-item {
+            position: relative;
+            border-radius: 8px;
+            overflow: hidden;
+            background: var(--surface3);
+            border: 1px solid var(--border);
+        }
+
+        .preview-item img {
+            width: 100%;
+            height: 90px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .remove-btn {
+            position: absolute;
+            top: 5px; right: 5px;
+            background: rgba(0,0,0,0.75);
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            width: 22px; height: 22px;
+            font-size: 11px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.15s;
+        }
+
+        .remove-btn:hover { background: var(--red); }
+
+        .file-name {
+            font-size: 10px;
+            color: var(--text-muted);
+            padding: 4px 6px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            background: var(--surface2);
+        }
+
+        /* ── PROGRESS ── */
+        .progress-wrap { display: none; margin-top: 20px; }
+
+        .progress-track {
+            height: 6px;
+            border-radius: 6px;
+            background: var(--surface3);
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--gold), var(--gold-light), var(--gold));
+            background-size: 200% 100%;
+            animation: shimmer 1.2s infinite;
+            border-radius: 6px;
+            width: 100%;
+        }
+
+        @keyframes shimmer {
+            0%   { background-position: 200% 0 }
+            100% { background-position: -200% 0 }
+        }
+
+        .progress-text {
+            text-align: center;
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 10px;
+            letter-spacing: 0.06em;
+        }
+
+        /* ── SUBMIT BUTTON ── */
+        .btn-upload {
+            width: 100%;
+            margin-top: 24px;
+            padding: 14px;
+            background: transparent;
+            border: 1px solid var(--gold);
+            color: var(--gold);
+            border-radius: 10px;
+            font-family: 'Cinzel', serif;
+            font-size: 13px;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.25s;
+        }
+
+        .btn-upload:hover:not(:disabled) {
+            background: var(--gold);
+            color: #000;
+        }
+
+        .btn-upload:disabled {
+            border-color: var(--border);
+            color: var(--text-muted);
+            cursor: not-allowed;
+        }
+
+        /* ── MOBILE ── */
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.open { transform: translateX(0); }
+            .sidebar-overlay.open { display: block; }
+            .hamburger { display: flex; }
+            .main { margin-left: 0; padding: 72px 18px 32px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Hamburger -->
+<button class="hamburger" onclick="toggleSidebar()" aria-label="Menu">
+    <i class="ti ti-menu-2"></i>
+</button>
+<div class="sidebar-overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+<!-- Sidebar -->
+<div class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+        <i class="ti ti-camera"></i> DREAM GALLERY
+    </div>
+    <a th:href="@{/dashboard}" href="#"><i class="ti ti-home"></i> Dashboard</a>
+    <a th:href="@{/clients}" href="#" class="active"><i class="ti ti-users"></i> Clients</a>
+    <a th:href="@{/owner/orders}" href="#"><i class="ti ti-currency-rupee"></i> Orders</a>
+    <a th:href="@{/owner/profile}" href="#"><i class="ti ti-user"></i> Profile</a>
+    <div class="sidebar-logout">
+        <a th:href="@{/logout}" href="#"><i class="ti ti-logout"></i> Logout</a>
+    </div>
+</div>
+
+<!-- Main -->
+<div class="main">
+
+    <div class="page-header">
+        <a th:href="@{/clients/{id}(id=${clientId})}" href="#" class="btn-back">
+            <i class="ti ti-arrow-left"></i> Back
+        </a>
+        <h1 class="page-title">Upload Photos</h1>
+    </div>
+
+    <!-- Alerts -->
+    <div th:if="${successMessage}" class="alert alert-success">
+        <i class="ti ti-circle-check"></i>
+        <span th:text="${successMessage}"></span>
+    </div>
+    <div th:if="${errorMessage}" class="alert alert-danger">
+        <i class="ti ti-alert-circle"></i>
+        <span th:text="${errorMessage}"></span>
+    </div>
+
+    <!-- Client info -->
+    <div class="client-card">
+        <div class="client-avatar"><i class="ti ti-heart"></i></div>
+        <div>
+            <div class="client-name" th:text="${client != null ? client.coupleName : 'Unknown Client'}">Client Name</div>
+            <div class="client-meta" th:text="${client != null ? client.phone : ''}">Phone</div>
+        </div>
+        <span class="status-badge" th:text="${client != null ? client.status : ''}">pending</span>
+    </div>
+
+    <!-- Upload card -->
+    <div class="upload-card">
+        <div class="card-top-bar"></div>
+        <div class="card-body">
+            <form th:action="@{/owner/upload}" method="post" enctype="multipart/form-data" id="uploadForm">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                <input type="hidden" name="clientId" th:value="${clientId}"/>
+
+                <!-- Album title -->
+                <label class="field-label"><i class="ti ti-folder"></i> Album Title</label>
+                <div class="input-wrap">
+                    <i class="ti ti-pencil input-icon"></i>
+                    <input type="text" name="albumTitle" id="albumTitle" class="form-input"
+                           placeholder="e.g. Wedding Day Highlights"
+                           th:value="${albumTitle != null ? albumTitle : ''}">
+                </div>
+
+                <!-- Divider -->
+                <div class="divider">
+                    <div class="divider-line"></div>
+                    <span class="divider-label">Photos</span>
+                    <div class="divider-line"></div>
+                </div>
+
+                <!-- Drop zone -->
+                <div class="drop-zone" id="dropZone">
+                    <div class="drop-icon"><i class="ti ti-cloud-upload"></i></div>
+                    <div class="drop-title">Click to select photos</div>
+                    <div class="drop-hint">or drag &amp; drop here · JPG, PNG, WEBP · Max 20 MB each</div>
+                    <input type="file" name="files" id="fileInput"
+                           multiple accept="image/jpeg,image/png,image/webp" style="display:none;">
+                </div>
+
+                <!-- Preview bar -->
+                <div class="preview-bar" id="previewBar">
+                    <span class="count-text">
+                        <i class="ti ti-photo"></i>
+                        <span id="countText">0 photos selected</span>
+                    </span>
+                    <button type="button" class="clear-btn" id="clearBtn">
+                        <i class="ti ti-trash"></i> Clear all
+                    </button>
+                </div>
+
+                <!-- Preview grid -->
+                <div class="preview-grid" id="previewGrid"></div>
+
+                <!-- Progress -->
+                <div class="progress-wrap" id="progressWrap">
+                    <div class="progress-track">
+                        <div class="progress-bar"></div>
+                    </div>
+                    <div class="progress-text">Uploading photos, please wait…</div>
+                </div>
+
+                <!-- Submit -->
+                <button type="submit" class="btn-upload" id="submitBtn" disabled>
+                    <i class="ti ti-upload"></i> Upload Photos
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    const fileInput    = document.getElementById('fileInput');
+    const previewGrid  = document.getElementById('previewGrid');
+    const previewBar   = document.getElementById('previewBar');
+    const countText    = document.getElementById('countText');
+    const submitBtn    = document.getElementById('submitBtn');
+    const dropZone     = document.getElementById('dropZone');
+    const clearBtn     = document.getElementById('clearBtn');
+    const progressWrap = document.getElementById('progressWrap');
+    const uploadForm   = document.getElementById('uploadForm');
+    let selectedFiles  = [];
+
+    dropZone.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', () => handleFiles(Array.from(fileInput.files)));
+
+    dropZone.addEventListener('dragover',  (e) => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+    dropZone.addEventListener('dragleave', ()  => dropZone.classList.remove('drag-over'));
+    dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('drag-over');
+        handleFiles(Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/')));
+    });
+
+    clearBtn.addEventListener('click', () => { selectedFiles = []; renderPreviews(); syncFileInput(); });
+
+    function handleFiles(files) {
+        files.forEach(f => {
+            if (!selectedFiles.find(x => x.name === f.name && x.size === f.size)) selectedFiles.push(f);
+        });
+        renderPreviews();
+        syncFileInput();
+    }
+
+    function renderPreviews() {
+        previewGrid.innerHTML = '';
+        selectedFiles.forEach((file, idx) => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const item = document.createElement('div');
+                item.className = 'preview-item';
+                item.innerHTML = `<img src="${e.target.result}" alt="${file.name}">
+                    <button type="button" class="remove-btn" data-idx="${idx}">✕</button>
+                    <div class="file-name">${file.name}</div>`;
+                previewGrid.appendChild(item);
+            };
+            reader.readAsDataURL(file);
+        });
+        const count = selectedFiles.length;
+        previewBar.style.display = count > 0 ? 'flex' : 'none';
+        if (count > 0) countText.textContent = `${count} photo${count > 1 ? 's' : ''} selected`;
+        submitBtn.disabled = count === 0;
+    }
+
+    previewGrid.addEventListener('click', (e) => {
+        if (e.target.classList.contains('remove-btn')) {
+            selectedFiles.splice(parseInt(e.target.dataset.idx), 1);
+            renderPreviews(); syncFileInput();
+        }
+    });
+
+    function syncFileInput() {
+        const dt = new DataTransfer();
+        selectedFiles.forEach(f => dt.items.add(f));
+        fileInput.files = dt.files;
+    }
+
+    uploadForm.addEventListener('submit', () => {
+        submitBtn.disabled = true;
+        progressWrap.style.display = 'block';
+    });
+
+    function toggleSidebar() {
+        document.getElementById('sidebar').classList.toggle('open');
+        document.getElementById('overlay').classList.toggle('open');
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Select Photos — Dream Gallery Photography</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@300;400;600&family=Raleway:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Raleway', sans-serif;
+            background: #080808;
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* SOCIAL — bottom right, above bottom nav (contact page style) */
+        .fixed-social {
+            position: fixed;
+            bottom: 90px;
+            right: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 200;
+        }
+        .fixed-social a {
+            width: 46px; height: 46px;
+            border: 1px solid rgba(212,175,55,0.35);
+            background: rgba(8,8,8,0.85);
+            backdrop-filter: blur(12px);
+            display: flex; align-items: center; justify-content: center;
+            color: #D4AF37;
+            font-size: 20px;
+            text-decoration: none;
+            transition: border-color 0.3s, background 0.3s, transform 0.3s;
+        }
+        .fixed-social a:hover {
+            border-color: #D4AF37;
+            background: rgba(212,175,55,0.12);
+            transform: scale(1.1);
+        }
+
+        /* HERO */
+        .page-hero {
+            height: 50vh;
+            min-height: 280px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            overflow: hidden;
+        }
+        .page-hero .hero-bg {
+            position: absolute;
+            inset: 0;
+            background: url('https://images.unsplash.com/photo-1519741497674-611481863552?w=1600&auto=format&fit=crop') center/cover no-repeat;
+            animation: subtleZoom 12s ease-in-out infinite alternate;
+        }
+        @keyframes subtleZoom {
+            from { transform: scale(1); }
+            to   { transform: scale(1.06); }
+        }
+        .page-hero .hero-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to bottom,
+                rgba(8,8,8,0.45) 0%,
+                rgba(8,8,8,0.7) 60%,
+                rgba(8,8,8,1) 100%);
+        }
+        .page-hero .hero-content {
+            position: relative;
+            z-index: 2;
+        }
+        .page-hero .eyebrow {
+            font-family: 'Raleway', sans-serif;
+            font-size: 0.7rem;
+            letter-spacing: 5px;
+            color: #D4AF37;
+            text-transform: uppercase;
+            margin-bottom: 14px;
+        }
+        .page-hero h1 {
+            font-family: 'Cinzel', serif;
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 300;
+            letter-spacing: 6px;
+            color: #fff;
+            line-height: 1.2;
+        }
+        .page-hero h1 span { color: #D4AF37; }
+        .page-hero .divider {
+            width: 60px;
+            height: 1px;
+            background: linear-gradient(to right, transparent, #D4AF37, transparent);
+            margin: 18px auto 0;
+        }
+
+        /* CARDS SECTION */
+        .select-section {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 50px 20px 100px;
+        }
+
+        .cards-wrap {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 28px;
+            max-width: 780px;
+            width: 100%;
+        }
+        @media (max-width: 580px) {
+            .cards-wrap { grid-template-columns: 1fr; }
+        }
+
+        .select-card {
+            position: relative;
+            display: block;
+            text-decoration: none;
+            color: #fff;
+            background: #0e0e0e;
+            border: 1px solid rgba(212,175,55,0.18);
+            border-radius: 20px;
+            padding: 48px 32px 40px;
+            text-align: center;
+            overflow: hidden;
+            transition: transform 0.4s cubic-bezier(.22,.68,0,1.2),
+                        border-color 0.4s,
+                        box-shadow 0.4s;
+        }
+        .select-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse at 50% 0%, rgba(212,175,55,0.07) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity 0.4s;
+        }
+        .select-card:hover {
+            transform: translateY(-10px);
+            border-color: rgba(212,175,55,0.6);
+            box-shadow: 0 30px 60px rgba(0,0,0,0.5), 0 0 40px rgba(212,175,55,0.08);
+        }
+        .select-card:hover::before { opacity: 1; }
+
+        .select-card .top-bar {
+            position: absolute;
+            top: 0; left: 20%; right: 20%;
+            height: 2px;
+            background: linear-gradient(to right, transparent, #D4AF37, transparent);
+            opacity: 0;
+            transition: opacity 0.4s;
+        }
+        .select-card:hover .top-bar { opacity: 1; }
+
+        .card-icon-wrap {
+            width: 72px; height: 72px;
+            border: 1px solid rgba(212,175,55,0.3);
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 24px;
+            font-size: 1.8rem;
+            color: #D4AF37;
+            background: rgba(212,175,55,0.06);
+            transition: all 0.4s;
+        }
+        .select-card:hover .card-icon-wrap {
+            background: rgba(212,175,55,0.12);
+            border-color: #D4AF37;
+        }
+
+        .select-card h2 {
+            font-family: 'Cinzel', serif;
+            font-size: 1.6rem;
+            font-weight: 400;
+            color: #D4AF37;
+            letter-spacing: 3px;
+            margin-bottom: 14px;
+        }
+        .select-card p {
+            font-family: 'Raleway', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 300;
+            color: #777;
+            line-height: 1.75;
+            margin-bottom: 32px;
+        }
+        .card-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 11px 30px;
+            border: 1px solid rgba(212,175,55,0.5);
+            color: #D4AF37;
+            border-radius: 40px;
+            font-family: 'Raleway', sans-serif;
+            font-size: 0.78rem;
+            font-weight: 500;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            transition: all 0.35s;
+        }
+        .select-card:hover .card-btn {
+            background: #D4AF37;
+            color: #000;
+            border-color: #D4AF37;
+        }
+        .card-btn i { font-size: 1rem; }
+
+        /* BOTTOM NAV */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            z-index: 100;
+            background: rgba(8,8,8,0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(212,175,55,0.15);
+            padding: 10px 0 max(10px, env(safe-area-inset-bottom));
+        }
+        .bottom-nav ul {
+            display: flex;
+            justify-content: space-around;
+            list-style: none;
+            max-width: 520px;
+            margin: 0 auto;
+        }
+        .bottom-nav ul li a {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            text-decoration: none;
+            color: #444;
+            font-family: 'Cinzel', serif;
+            font-size: 8px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            transition: color 0.3s;
+            padding: 4px 8px;
+        }
+        .bottom-nav ul li a i { font-size: 20px; }
+        .bottom-nav ul li a:hover,
+        .bottom-nav ul li a.active { color: #D4AF37; }
+    </style>
+</head>
+<body>
+
+<!-- Social Icons — bottom right, above bottom nav -->
+<div class="fixed-social">
+    <a href="https://instagram.com/dreamgalleryphoto" target="_blank" aria-label="Instagram">
+        <i class="ti ti-brand-instagram"></i>
+    </a>
+    <a href="https://wa.me/919999999999?text=Hi! I'm interested in your photography services." target="_blank" aria-label="WhatsApp">
+        <i class="ti ti-brand-whatsapp"></i>
+    </a>
+</div>
+
+<!-- Hero -->
+<div class="page-hero">
+    <div class="hero-bg"></div>
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+        <p class="eyebrow">Dream Gallery Photography</p>
+        <h1>Select Your <span>Photos</span></h1>
+        <div class="divider"></div>
+    </div>
+</div>
+
+<!-- Cards -->
+<div class="select-section">
+    <div class="cards-wrap">
+        <a href="/login" class="select-card">
+            <div class="top-bar"></div>
+            <div class="card-icon-wrap">
+                <i class="ti ti-camera"></i>
+            </div>
+            <h2>Admin</h2>
+            <p>Photographer login to manage clients, upload photos and create beautiful galleries.</p>
+            <span class="card-btn">
+                Admin Login
+                <i class="ti ti-arrow-right"></i>
+            </span>
+        </a>
+
+        <a href="/client/login" class="select-card">
+            <div class="top-bar"></div>
+            <div class="card-icon-wrap">
+                <i class="ti ti-heart"></i>
+            </div>
+            <h2>Client</h2>
+            <p>View your wedding photos and choose your favourite precious moments to treasure forever.</p>
+            <span class="card-btn">
+                Client Login
+                <i class="ti ti-arrow-right"></i>
+            </span>
+        </a>
+    </div>
+</div>
+
+<!-- Bottom Nav -->
+<nav class="bottom-nav">
+    <ul>
+        <li><a href="/"><i class="ti ti-home"></i><span>Home</span></a></li>
+        <li><a href="/work"><i class="ti ti-movie"></i><span>Work</span></a></li>
+        <li><a href="/select" class="active"><i class="ti ti-photo"></i><span>Select</span></a></li>
+        <li><a href="/packages-page"><i class="ti ti-diamond"></i><span>Packages</span></a></li>
+        <li><a href="/contact"><i class="ti ti-phone"></i><span>Contact</span></a></li>
+    </ul>
+</nav>
+
+</body>
+</html>

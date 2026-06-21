@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Submitted — Dream Gallery Photography</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@300;400;600&family=Raleway:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Raleway', sans-serif;
+            background: #080808;
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed; inset: 0;
+            background: url('https://images.unsplash.com/photo-1519741497674-611481863552?w=1200&auto=format&fit=crop') center/cover no-repeat;
+            opacity: 0.04;
+            pointer-events: none;
+        }
+
+        .wrap {
+            width: 100%; max-width: 480px;
+            position: relative; z-index: 1;
+            text-align: center;
+        }
+
+        /* SUCCESS ICON */
+        .success-ring {
+            width: 80px; height: 80px; border-radius: 50%;
+            border: 1px solid rgba(212,175,55,0.3);
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 28px;
+            background: rgba(212,175,55,0.06);
+            animation: ringPulse 2.5s ease-in-out infinite;
+        }
+        @keyframes ringPulse {
+            0%,100% { box-shadow: 0 0 0 0 rgba(212,175,55,0.15); }
+            50%      { box-shadow: 0 0 0 14px rgba(212,175,55,0); }
+        }
+        .success-ring i { color: #D4AF37; font-size: 2.2rem; }
+
+        /* BRAND */
+        .eyebrow {
+            font-size: 0.65rem; letter-spacing: 5px;
+            text-transform: uppercase; color: #D4AF37; margin-bottom: 10px;
+        }
+        .title {
+            font-family: 'Cinzel', serif;
+            font-size: clamp(1.5rem, 4vw, 2rem);
+            font-weight: 300; letter-spacing: 4px;
+            color: #fff; margin-bottom: 12px;
+        }
+        .title span { color: #D4AF37; }
+        .gold-line {
+            width: 50px; height: 1px;
+            background: linear-gradient(to right, transparent, #D4AF37, transparent);
+            margin: 0 auto 20px;
+        }
+        .subtitle {
+            color: #555; font-size: 0.85rem;
+            font-weight: 300; line-height: 1.8; margin-bottom: 32px;
+        }
+        .subtitle strong { color: #D4AF37; font-family: 'Cinzel', serif; }
+
+        /* CARD */
+        .card {
+            background: #0e0e0e;
+            border: 1px solid rgba(212,175,55,0.15);
+            border-radius: 20px; padding: 32px 28px;
+            margin-bottom: 24px; position: relative; overflow: hidden;
+        }
+        .card::before {
+            content: '';
+            position: absolute; top: 0; left: 20%; right: 20%; height: 1px;
+            background: linear-gradient(to right, transparent, #D4AF37, transparent);
+        }
+        @media(max-width:480px) { .card { padding: 24px 18px; } }
+
+        .card-label {
+            font-size: 0.65rem; letter-spacing: 3px;
+            text-transform: uppercase; color: #444; margin-bottom: 16px;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .card-label::before, .card-label::after {
+            content: ''; flex: 1; height: 1px;
+            background: rgba(212,175,55,0.1);
+        }
+
+        /* PHOTO LIST */
+        .photo-list {
+            display: flex; flex-direction: column; gap: 8px;
+            max-height: 240px; overflow-y: auto;
+        }
+        .photo-list::-webkit-scrollbar { width: 3px; }
+        .photo-list::-webkit-scrollbar-track { background: transparent; }
+        .photo-list::-webkit-scrollbar-thumb { background: rgba(212,175,55,0.2); border-radius: 2px; }
+
+        .photo-row {
+            display: flex; align-items: center; gap: 10px;
+            padding: 9px 12px; border-radius: 10px;
+            background: #111; border: 1px solid rgba(212,175,55,0.06);
+            text-align: left;
+        }
+        .photo-row i { color: #D4AF37; font-size: 0.95rem; flex-shrink: 0; }
+        .photo-row span {
+            font-size: 0.78rem; color: #666;
+            font-weight: 300; white-space: nowrap;
+            overflow: hidden; text-overflow: ellipsis;
+        }
+
+        /* BACK BTN */
+        .btn-back {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 13px 36px;
+            background: transparent;
+            border: 1px solid rgba(212,175,55,0.4);
+            color: #D4AF37; border-radius: 40px;
+            font-family: 'Cinzel', serif;
+            font-size: 0.75rem; letter-spacing: 2px;
+            text-transform: uppercase; text-decoration: none;
+            transition: all 0.35s;
+        }
+        .btn-back:hover { background: #D4AF37; color: #000; border-color: #D4AF37; }
+        .btn-back i { font-size: 1rem; }
+    </style>
+</head>
+<body>
+
+<div class="wrap">
+
+    <!-- ICON -->
+    <div class="success-ring">
+        <i class="ti ti-heart"></i>
+    </div>
+
+    <!-- HEADING -->
+    <p class="eyebrow">Dream Gallery Photography</p>
+    <h1 class="title">Selection <span>Submitted!</span></h1>
+    <div class="gold-line"></div>
+    <p class="subtitle">
+        You selected <strong th:text="${count}">0</strong> beautiful photos.<br>
+        We will contact you soon!
+    </p>
+
+    <!-- PHOTO LIST -->
+    <div class="card" th:if="${!selections.isEmpty()}">
+        <p class="card-label">Your Selected Photos</p>
+        <div class="photo-list">
+            <div class="photo-row" th:each="sel : ${selections}">
+                <i class="ti ti-photo"></i>
+                <span th:text="${sel.photo.filename}">photo.jpg</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- BACK BUTTON -->
+    <a th:href="@{/gallery/view}" class="btn-back">
+        <i class="ti ti-arrow-left"></i> Back to Gallery
+    </a>
+
+</div>
+
+<script>
+    // Replace this page in history so the POST /gallery/submit is never
+    // in the browser stack. Back button goes cleanly to /gallery/view.
+    if (window.history && window.history.replaceState) {
+        window.history.replaceState(null, '', '/gallery/submitted');
+    }
+</script>
+
+</body>
+</html>

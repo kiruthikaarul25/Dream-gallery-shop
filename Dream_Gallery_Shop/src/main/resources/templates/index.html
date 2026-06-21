@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dream Gallery Photography</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@300;400;600&family=Raleway:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Raleway', sans-serif;
+            background: #080808;
+            color: #fff;
+            overflow-x: hidden;
+        }
+
+        .fixed-social {
+            position: fixed;
+            bottom: 90px;
+            right: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 300;
+        }
+        .fixed-social a {
+            width: 46px; height: 46px;
+            border: 1px solid rgba(212,175,55,0.35);
+            background: rgba(8,8,8,0.85);
+            backdrop-filter: blur(12px);
+            display: flex; align-items: center; justify-content: center;
+            color: #D4AF37;
+            font-size: 20px;
+            text-decoration: none;
+            transition: border-color 0.3s, background 0.3s, transform 0.3s;
+        }
+        .fixed-social a:hover {
+            border-color: #D4AF37;
+            background: rgba(212,175,55,0.12);
+            transform: scale(1.1);
+        }
+
+        .hero {
+            position: relative;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .slide {
+            position: absolute;
+            width: 100%; height: 100%;
+            background-size: cover;
+            background-position: center top;
+            opacity: 0;
+            transition: opacity 2s ease-in-out;
+            transform: scale(1.08);
+        }
+
+        .slide.active {
+            opacity: 1;
+            animation: zoomSlide 7s ease-in-out forwards;
+        }
+
+        @keyframes zoomSlide {
+            from { transform: scale(1.08); }
+            to   { transform: scale(1.0); }
+        }
+
+        .slide:nth-child(1) { background-image: url('https://images.unsplash.com/photo-1612428852832-5a31da9e6e9e?w=1600&auto=format&fit=crop'); }
+        .slide:nth-child(2) { background-image: url('https://images.unsplash.com/photo-1591604466107-ec97de577aff?w=1600&auto=format&fit=crop'); }
+        .slide:nth-child(3) { background-image: url('https://images.unsplash.com/photo-1617575521317-d6234c9ed726?w=1600&auto=format&fit=crop'); }
+        .slide:nth-child(4) { background-image: url('https://images.unsplash.com/photo-1583939411023-14783179e581?w=1600&auto=format&fit=crop'); }
+        .slide:nth-child(5) { background-image: url('https://images.unsplash.com/photo-1601933470096-0e34634ffcde?w=1600&auto=format&fit=crop'); }
+
+        .hero-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(
+                to bottom,
+                rgba(0,0,0,0.3) 0%,
+                rgba(0,0,0,0.05) 40%,
+                rgba(0,0,0,0.78) 100%
+            );
+            z-index: 1;
+        }
+
+        .hero-content {
+            position: absolute;
+            bottom: 110px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-align: center;
+            z-index: 2;
+            width: 90%;
+        }
+
+        .hero-tag {
+            font-family: 'Cinzel', serif;
+            font-size: 10px;
+            letter-spacing: 6px;
+            color: #D4AF37;
+            text-transform: uppercase;
+            display: block;
+            margin-bottom: 16px;
+            opacity: 0;
+            animation: fadeUp 1s ease 0.4s forwards;
+        }
+
+        .hero-content h1 {
+            font-family: 'Cinzel', serif;
+            font-size: clamp(2.8rem, 8vw, 6rem);
+            color: #fff;
+            letter-spacing: 4px;
+            font-weight: 300;
+            line-height: 1.1;
+            margin-bottom: 14px;
+            min-height: 1.2em;
+        }
+
+        .hero-content h1 span.gold { color: #D4AF37; }
+
+        /* typewriter cursor */
+        .cursor {
+            display: inline-block;
+            width: 2px;
+            background: #D4AF37;
+            margin-left: 3px;
+            animation: blink 0.75s step-end infinite;
+            vertical-align: baseline;
+            height: 0.85em;
+            position: relative;
+            top: 0.05em;
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50%       { opacity: 0; }
+        }
+
+        .hero-gold-line {
+            width: 50px; height: 1px;
+            background: #D4AF37;
+            margin: 16px auto;
+            opacity: 0;
+            animation: fadeUp 1s ease 0.9s forwards;
+        }
+
+        .hero-sub {
+            font-family: 'Raleway', sans-serif;
+            font-size: clamp(0.72rem, 2vw, 0.88rem);
+            color: rgba(255,255,255,0.45);
+            letter-spacing: 5px;
+            text-transform: uppercase;
+            font-weight: 300;
+            min-height: 1.4em;
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(18px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .slide-dots {
+            position: absolute;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 8px;
+            z-index: 3;
+        }
+        .dot {
+            width: 24px; height: 2px;
+            background: rgba(255,255,255,0.2);
+            transition: background 0.4s, width 0.4s;
+            cursor: pointer;
+        }
+        .dot.active { background: #D4AF37; width: 40px; }
+
+        .insta-section {
+            padding: 70px 20px 40px;
+            background: #080808;
+            text-align: center;
+        }
+
+        .insta-tag {
+            font-family: 'Cinzel', serif;
+            font-size: 9px;
+            letter-spacing: 5px;
+            color: #D4AF37;
+            text-transform: uppercase;
+            opacity: 0.7;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .insta-section h2 {
+            font-family: 'Cinzel', serif;
+            font-size: clamp(1.5rem, 4vw, 2.2rem);
+            color: #e8e0d5;
+            font-weight: 300;
+            letter-spacing: 3px;
+            margin-bottom: 6px;
+        }
+
+        .insta-section p {
+            color: #444;
+            font-size: 0.78rem;
+            letter-spacing: 2px;
+            margin-bottom: 36px;
+            text-transform: uppercase;
+        }
+
+        .insta-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 3px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        @media(max-width: 500px) {
+            .insta-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        .insta-item {
+            aspect-ratio: 1;
+            background: #111;
+            overflow: hidden;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .insta-item img {
+            width: 100%; height: 100%;
+            object-fit: cover;
+            object-position: center top;
+            transition: transform 0.6s ease;
+            pointer-events: none;
+            user-select: none;
+            display: block;
+        }
+
+        .insta-item::after {
+            content: '';
+            position: absolute; inset: 0;
+            background: rgba(212,175,55,0);
+            transition: background 0.4s;
+        }
+        .insta-item:hover img { transform: scale(1.08); }
+        .insta-item:hover::after { background: rgba(212,175,55,0.1); }
+
+        .insta-item::before {
+            content: '';
+            position: absolute; inset: 0;
+            border: 2px solid transparent;
+            transition: border-color 0.4s;
+            z-index: 2;
+        }
+        .insta-item:hover::before { border-color: rgba(212,175,55,0.45); }
+
+        .insta-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 32px;
+            padding: 13px 32px;
+            border: 1px solid rgba(212,175,55,0.4);
+            color: #D4AF37;
+            text-decoration: none;
+            font-family: 'Cinzel', serif;
+            font-size: 0.7rem;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        .insta-link::before {
+            content: '';
+            position: absolute; inset: 0;
+            background: #D4AF37;
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.3s;
+            z-index: 0;
+        }
+        .insta-link:hover::before { transform: scaleX(1); }
+        .insta-link:hover { color: #000; }
+        .insta-link span, .insta-link i { position: relative; z-index: 1; }
+        .insta-link i { font-size: 18px; }
+
+        .bottom-nav {
+            position: fixed;
+            bottom: 0; left: 0; right: 0;
+            z-index: 200;
+            background: rgba(8,8,8,0.92);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(212,175,55,0.15);
+            padding: 10px 0 max(10px, env(safe-area-inset-bottom));
+        }
+
+        .bottom-nav ul {
+            display: flex;
+            justify-content: space-around;
+            list-style: none;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .bottom-nav ul li a {
+            display: flex; flex-direction: column;
+            align-items: center; gap: 4px;
+            text-decoration: none;
+            color: #444;
+            font-family: 'Cinzel', serif;
+            font-size: 8px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            transition: color 0.3s;
+            padding: 4px 8px;
+        }
+
+        .bottom-nav ul li a i { font-size: 20px; transition: transform 0.3s; }
+        .bottom-nav ul li a:hover i { transform: translateY(-3px); }
+        .bottom-nav ul li a:hover,
+        .bottom-nav ul li a.active { color: #D4AF37; }
+
+        .spacer { height: 80px; }
+
+        .animate-in {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.7s ease, transform 0.7s ease;
+        }
+        .animate-in.visible { opacity: 1; transform: translateY(0); }
+    </style>
+</head>
+<body>
+
+<div class="fixed-social">
+    <a href="https://instagram.com/dreamgalleryphoto" target="_blank" aria-label="Instagram">
+        <i class="ti ti-brand-instagram"></i>
+    </a>
+    <a href="https://wa.me/919876543210?text=Hi! I'm interested in your photography services." target="_blank" aria-label="WhatsApp">
+        <i class="ti ti-brand-whatsapp"></i>
+    </a>
+</div>
+
+<section class="hero">
+    <div class="slide active"></div>
+    <div class="slide"></div>
+    <div class="slide"></div>
+    <div class="slide"></div>
+    <div class="slide"></div>
+    <div class="hero-overlay"></div>
+
+    <div class="hero-content">
+        <span class="hero-tag">Tamil Nadu Wedding Photography</span>
+        <h1 id="heroTitle"><span class="cursor" id="cur1"></span></h1>
+        <div class="hero-gold-line"></div>
+        <p class="hero-sub" id="heroSub"></p>
+    </div>
+
+    <div class="slide-dots" id="dots"></div>
+</section>
+
+<section class="insta-section animate-in">
+    <span class="insta-tag">Follow our journey</span>
+    <h2>Our Work</h2>
+    <p>@dreamgalleryphoto</p>
+
+    <div class="insta-grid">
+        <div class="insta-item"><img src="https://images.unsplash.com/photo-1612428852832-5a31da9e6e9e?w=500&auto=format&fit=crop" alt="South Indian bridal"></div>
+        <div class="insta-item"><img src="https://images.unsplash.com/photo-1591604466107-ec97de577aff?w=500&auto=format&fit=crop" alt="Tamil bride"></div>
+        <div class="insta-item"><img src="https://images.unsplash.com/photo-1617575521317-d6234c9ed726?w=500&auto=format&fit=crop" alt="South Indian wedding"></div>
+        <div class="insta-item"><img src="https://images.unsplash.com/photo-1583939411023-14783179e581?w=500&auto=format&fit=crop" alt="Indian wedding ceremony"></div>
+        <div class="insta-item"><img src="https://images.unsplash.com/photo-1601933470096-0e34634ffcde?w=500&auto=format&fit=crop" alt="Indian bridal portrait"></div>
+        <div class="insta-item"><img src="https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=500&auto=format&fit=crop" alt="Wedding portrait"></div>
+    </div>
+
+    <a href="https://instagram.com/dreamgalleryphoto" target="_blank" class="insta-link">
+        <i class="ti ti-brand-instagram"></i>
+        <span>View on Instagram</span>
+    </a>
+</section>
+
+<div class="spacer"></div>
+
+<nav class="bottom-nav">
+    <ul>
+        <li><a href="/work"><i class="ti ti-video"></i><span>Work</span></a></li>
+        <li><a href="/select"><i class="ti ti-photo"></i><span>Select</span></a></li>
+        <li><a href="/packages-page"><i class="ti ti-diamond"></i><span>Packages</span></a></li>
+        <li><a href="/contact"><i class="ti ti-phone"></i><span>Contact</span></a></li>
+    </ul>
+</nav>
+
+<script>
+    /* ── Slideshow ── */
+    const slides = document.querySelectorAll('.slide');
+    const dotsContainer = document.getElementById('dots');
+    let current = 0;
+
+    slides.forEach((_, i) => {
+        const d = document.createElement('div');
+        d.className = 'dot' + (i === 0 ? ' active' : '');
+        d.onclick = () => goTo(i);
+        dotsContainer.appendChild(d);
+    });
+
+    function goTo(n) {
+        slides[current].classList.remove('active');
+        document.querySelectorAll('.dot')[current].classList.remove('active');
+        current = n;
+        slides[current].classList.add('active');
+        document.querySelectorAll('.dot')[current].classList.add('active');
+    }
+
+    setInterval(() => goTo((current + 1) % slides.length), 5500);
+
+    /* ── Typewriter ── */
+    function typewriter(element, segments, delay, onDone) {
+        // segments = [{text, gold}]  — renders plain or gold spans
+        let segIdx = 0, charIdx = 0;
+
+        // cursor stays at end — insert before it
+        const cursor = element.querySelector('.cursor') || document.createElement('span');
+
+        function tick() {
+            if (segIdx >= segments.length) {
+                // done — remove cursor from h1, add blinking cursor to sub line
+                cursor.remove();
+                if (onDone) onDone();
+                return;
+            }
+            const seg = segments[segIdx];
+            // find or create span for this segment
+            let span = element.querySelector('[data-seg="' + segIdx + '"]');
+            if (!span) {
+                span = document.createElement('span');
+                if (seg.gold) span.classList.add('gold');
+                span.dataset.seg = segIdx;
+                element.insertBefore(span, cursor);
+            }
+            span.textContent += seg.text[charIdx];
+            charIdx++;
+            if (charIdx >= seg.text.length) {
+                segIdx++;
+                charIdx = 0;
+                setTimeout(tick, seg.pause || 80);
+            } else {
+                setTimeout(tick, delay);
+            }
+        }
+        tick();
+    }
+
+    function typewriterSimple(element, text, delay, showCursor, onDone) {
+        element.textContent = '';
+        const cursor = document.createElement('span');
+        cursor.className = 'cursor';
+        element.appendChild(cursor);
+
+        let i = 0;
+        function tick() {
+            if (i >= text.length) {
+                if (!showCursor) cursor.remove();
+                if (onDone) onDone();
+                return;
+            }
+            cursor.insertAdjacentText('beforebegin', text[i]);
+            i++;
+            setTimeout(tick, delay);
+        }
+        tick();
+    }
+
+    // Start after slight delay (hero tag fade-in)
+    setTimeout(() => {
+        const h1 = document.getElementById('heroTitle');
+        const sub = document.getElementById('heroSub');
+
+        // Type "Dream " then "Gallery" in gold
+        const segments = [
+            { text: 'Dream ', gold: false, pause: 120 },
+            { text: 'Gallery', gold: true, pause: 0 }
+        ];
+
+        typewriter(h1, segments, 90, () => {
+            // After h1 done, type subtitle
+            setTimeout(() => {
+                typewriterSimple(sub, 'Photography & Cinematography', 55, true, null);
+            }, 300);
+        });
+    }, 800);
+
+    /* ── Image fallback ── */
+    document.querySelectorAll('.insta-item img').forEach(img => {
+        img.onerror = function() {
+            this.parentElement.style.background = '#1a1a1a';
+            this.style.display = 'none';
+        };
+    });
+
+    /* ── Scroll animation ── */
+    const observer = new IntersectionObserver(entries => {
+        entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+    }, { threshold: 0.1 });
+    document.querySelectorAll('.animate-in').forEach(el => observer.observe(el));
+
+    /* ── Screenshot protection ── */
+    document.addEventListener('contextmenu', e => e.preventDefault());
+    document.addEventListener('keydown', e => {
+        if (e.key === 'PrintScreen' ||
+            (e.ctrlKey && ['s','u','p'].includes(e.key.toLowerCase())) ||
+            e.key === 'F12') e.preventDefault();
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Client — Dream Gallery Photography</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@300;400;600&family=Raleway:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Raleway', sans-serif;
+            background: #080808; color: #fff;
+            min-height: 100vh; display: flex;
+        }
+
+        /* ── SIDEBAR ── */
+        .sidebar {
+            width: 220px; min-height: 100vh;
+            background: #0a0a0a;
+            border-right: 1px solid rgba(212,175,55,0.1);
+            padding: 28px 16px;
+            position: fixed; top: 0; left: 0; bottom: 0;
+            display: flex; flex-direction: column;
+            z-index: 50;
+        }
+        .sidebar-brand {
+            padding: 0 8px 28px;
+            border-bottom: 1px solid rgba(212,175,55,0.1);
+            margin-bottom: 20px;
+        }
+        .sidebar-brand h2 {
+            font-family: 'Cinzel', serif;
+            font-size: 1rem; font-weight: 400;
+            letter-spacing: 3px; color: #D4AF37;
+        }
+        .sidebar-brand p {
+            font-size: 0.6rem; letter-spacing: 3px;
+            text-transform: uppercase; color: #333; margin-top: 3px;
+        }
+
+        .nav-item {
+            display: flex; align-items: center; gap: 10px;
+            padding: 10px 12px; border-radius: 10px;
+            color: #444; text-decoration: none;
+            font-size: 0.78rem; letter-spacing: 1.5px;
+            text-transform: uppercase; margin-bottom: 4px;
+            transition: all 0.25s;
+            border: 1px solid transparent;
+        }
+        .nav-item i { font-size: 1.05rem; flex-shrink: 0; }
+        .nav-item:hover { color: #D4AF37; background: rgba(212,175,55,0.05); border-color: rgba(212,175,55,0.1); }
+        .nav-item.active { color: #D4AF37; background: rgba(212,175,55,0.08); border-color: rgba(212,175,55,0.15); }
+        .nav-item.danger { color: #555; }
+        .nav-item.danger:hover { color: #e74c3c; background: rgba(231,76,60,0.05); border-color: rgba(231,76,60,0.1); }
+
+        .sidebar-spacer { flex: 1; }
+
+        /* mobile sidebar toggle */
+        .mob-header {
+            display: none;
+            position: sticky; top: 0; z-index: 40;
+            background: rgba(8,8,8,0.95); backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(212,175,55,0.1);
+            padding: 14px 18px;
+            align-items: center; justify-content: space-between;
+        }
+        .mob-header h2 {
+            font-family: 'Cinzel', serif; font-size: 0.9rem;
+            font-weight: 400; letter-spacing: 3px; color: #D4AF37;
+        }
+        .mob-menu-btn {
+            background: none; border: 1px solid rgba(212,175,55,0.2);
+            border-radius: 8px; color: #D4AF37;
+            width: 36px; height: 36px;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; font-size: 1.1rem;
+        }
+        @media(max-width:768px) {
+            .sidebar { transform: translateX(-100%); transition: transform 0.3s; }
+            .sidebar.open { transform: translateX(0); }
+            .mob-header { display: flex; }
+            .main { margin-left: 0 !important; }
+        }
+
+        /* ── MAIN ── */
+        .main {
+            margin-left: 220px; flex: 1;
+            padding: 36px 28px; min-height: 100vh;
+        }
+        @media(max-width:900px) { .main { padding: 24px 16px; } }
+
+        /* PAGE HEADER */
+        .page-top {
+            display: flex; align-items: center; gap: 14px; margin-bottom: 32px;
+        }
+        .back-btn {
+            display: flex; align-items: center; gap: 6px;
+            padding: 8px 16px; border-radius: 30px;
+            border: 1px solid rgba(212,175,55,0.2);
+            color: #555; text-decoration: none;
+            font-size: 0.72rem; letter-spacing: 1.5px;
+            text-transform: uppercase; transition: all 0.25s;
+        }
+        .back-btn:hover { color: #D4AF37; border-color: rgba(212,175,55,0.4); }
+        .back-btn i { font-size: 0.9rem; }
+
+        .page-top h4 {
+            font-family: 'Cinzel', serif;
+            font-size: 1.2rem; font-weight: 300;
+            letter-spacing: 3px; color: #fff;
+        }
+
+        /* FORM CARD */
+        .form-card {
+            background: #0e0e0e;
+            border: 1px solid rgba(212,175,55,0.15);
+            border-radius: 20px; padding: 36px 32px;
+            max-width: 540px; position: relative; overflow: hidden;
+        }
+        .form-card::before {
+            content: '';
+            position: absolute; top: 0; left: 20%; right: 20%; height: 1px;
+            background: linear-gradient(to right, transparent, #D4AF37, transparent);
+        }
+        @media(max-width:600px) { .form-card { padding: 26px 18px; } }
+
+        /* FIELDS */
+        .field { margin-bottom: 20px; }
+        .field label {
+            display: block; font-size: 0.68rem;
+            letter-spacing: 2px; text-transform: uppercase;
+            color: #555; margin-bottom: 8px;
+        }
+        .field label span { color: #D4AF37; margin-left: 2px; }
+        .input-wrap { position: relative; }
+        .input-wrap i {
+            position: absolute; left: 13px; top: 50%;
+            transform: translateY(-50%);
+            color: #333; font-size: 1rem; pointer-events: none;
+            transition: color 0.3s;
+        }
+        .input-wrap:focus-within i { color: #D4AF37; }
+        .field input {
+            width: 100%;
+            background: #080808;
+            border: 1px solid rgba(212,175,55,0.12);
+            border-radius: 12px;
+            padding: 13px 16px 13px 42px;
+            color: #fff;
+            font-family: 'Raleway', sans-serif;
+            font-size: 0.88rem; font-weight: 300;
+            outline: none; transition: border-color 0.3s;
+        }
+        .field input::placeholder { color: #2a2a2a; }
+        .field input:focus { border-color: rgba(212,175,55,0.45); }
+        .field-hint {
+            font-size: 0.7rem; color: #383838;
+            margin-top: 6px; letter-spacing: 0.5px; line-height: 1.5;
+        }
+
+        /* SECTION DIVIDER */
+        .section-sep {
+            display: flex; align-items: center; gap: 12px;
+            margin: 28px 0 22px;
+        }
+        .section-sep .sep-line {
+            flex: 1; height: 1px;
+            background: rgba(212,175,55,0.1);
+        }
+        .section-sep .sep-label {
+            display: flex; align-items: center; gap: 7px;
+            font-size: 0.65rem; letter-spacing: 3px;
+            text-transform: uppercase; color: #D4AF37;
+            white-space: nowrap;
+        }
+        .section-sep .sep-label i { font-size: 0.9rem; }
+
+        /* SUBMIT */
+        .btn-submit {
+            width: 100%; margin-top: 8px;
+            padding: 14px;
+            background: transparent;
+            border: 1px solid rgba(212,175,55,0.45);
+            color: #D4AF37; border-radius: 40px; cursor: pointer;
+            font-family: 'Cinzel', serif;
+            font-size: 0.78rem; letter-spacing: 3px;
+            text-transform: uppercase;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            transition: all 0.35s;
+        }
+        .btn-submit:hover { background: #D4AF37; color: #000; border-color: #D4AF37; }
+        .btn-submit i { font-size: 1rem; }
+    </style>
+</head>
+<body>
+
+<!-- MOBILE HEADER -->
+<div class="mob-header">
+    <h2>Dream Gallery</h2>
+    <button class="mob-menu-btn" onclick="document.querySelector('.sidebar').classList.toggle('open')">
+        <i class="ti ti-menu-2"></i>
+    </button>
+</div>
+
+<!-- SIDEBAR -->
+<nav class="sidebar">
+    <div class="sidebar-brand">
+        <h2>Dream Gallery</h2>
+        <p>Admin Panel</p>
+    </div>
+    <a th:href="@{/dashboard}" class="nav-item"><i class="ti ti-layout-dashboard"></i>Dashboard</a>
+    <a th:href="@{/clients}" class="nav-item active"><i class="ti ti-users"></i>Clients</a>
+    <a th:href="@{/orders}" class="nav-item"><i class="ti ti-receipt"></i>Orders</a>
+    <a th:href="@{/owner/profile}" class="nav-item"><i class="ti ti-user-circle"></i>Profile</a>
+    <div class="sidebar-spacer"></div>
+    <a th:href="@{/logout}" class="nav-item danger"><i class="ti ti-logout"></i>Logout</a>
+</nav>
+
+<!-- MAIN -->
+<div class="main">
+    <div class="page-top">
+        <a th:href="@{/clients}" class="back-btn"><i class="ti ti-arrow-left"></i>Back</a>
+        <h4>Add New Client</h4>
+    </div>
+
+    <div class="form-card">
+        <form th:action="@{/clients/add}" th:object="${client}" method="post">
+
+            <!-- Couple Name -->
+            <div class="field">
+                <label>Couple Name <span>*</span></label>
+                <div class="input-wrap">
+                    <input type="text" th:field="*{coupleName}" placeholder="Ravi &amp; Kavitha" required>
+                    <i class="ti ti-heart"></i>
+                </div>
+            </div>
+
+            <!-- Phone -->
+            <div class="field">
+                <label>Phone <span>*</span></label>
+                <div class="input-wrap">
+                    <input type="text" th:field="*{phone}" placeholder="+91 98765 43210" required>
+                    <i class="ti ti-phone"></i>
+                </div>
+            </div>
+
+            <!-- Wedding Date -->
+            <div class="field">
+                <label>Wedding Date</label>
+                <div class="input-wrap">
+                    <input type="date" th:field="*{weddingDate}">
+                    <i class="ti ti-calendar"></i>
+                </div>
+            </div>
+
+            <!-- SECTION: Credentials -->
+            <div class="section-sep">
+                <div class="sep-line"></div>
+                <div class="sep-label"><i class="ti ti-lock"></i>Gallery Login</div>
+                <div class="sep-line"></div>
+            </div>
+
+            <!-- Username -->
+            <div class="field">
+                <label>Username <span>*</span></label>
+                <div class="input-wrap">
+                    <input type="text" th:field="*{accessToken}"
+                           placeholder="e.g. ravi.kavitha" required
+                           oninput="this.value=this.value.toLowerCase().replace(/\s/g,'')">
+                    <i class="ti ti-user"></i>
+                </div>
+                <div class="field-hint">Client will use this to login to their gallery</div>
+            </div>
+
+            <!-- Password -->
+            <div class="field">
+                <label>Password <span>*</span></label>
+                <div class="input-wrap">
+                    <input type="text" th:field="*{accessPassword}"
+                           placeholder="e.g. Wedding@2025" required>
+                    <i class="ti ti-key"></i>
+                </div>
+                <div class="field-hint">Share this with the client along with the gallery link</div>
+            </div>
+
+            <button type="submit" class="btn-submit">
+                <i class="ti ti-user-plus"></i> Add Client
+            </button>
+
+        </form>
+    </div>
+</div>
+
+</body>
+</html>

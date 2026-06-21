@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard — Dream Gallery Photography</title>
+    <!-- FAVICON -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📷</text></svg>">
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@300;400;600&family=Raleway:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --gold: #c9a84c; --gold-light: #e2c97e; --gold-dim: rgba(201,168,76,0.12);
+            --gold-border: rgba(201,168,76,0.25); --bg: #080808; --surface: #0e0e0e;
+            --surface2: #141414; --surface3: #1c1c1c; --border: rgba(201,168,76,0.2);
+            --text: #e8e0d0; --text-muted: #6a6050; --text-sub: #9a9080;
+            --green: #27ae60; --green-dim: rgba(39,174,96,0.12); --red: #c0392b;
+        }
+        body { background: var(--bg); color: var(--text); font-family: 'Raleway', sans-serif; min-height: 100vh; display: flex; }
+
+        /* ── SIDEBAR ── */
+        .sidebar {
+            width: 240px;
+            min-height: 100vh;
+            background: var(--surface);
+            border-right: 1px solid var(--border);
+            padding: 28px 16px;
+            position: fixed;
+            top: 0; left: 0;
+            display: flex;
+            flex-direction: column;
+            z-index: 200;
+            transition: transform 0.3s ease;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .sidebar-brand {
+            font-family: 'Cinzel', serif;
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--gold);
+            letter-spacing: 0.12em;
+            padding: 0 8px 28px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-shrink: 0;
+            white-space: nowrap;
+            min-width: 0;
+        }
+        .sidebar-brand i {
+            font-size: 20px;
+            flex-shrink: 0;
+            color: var(--gold);
+        }
+        .sidebar-brand-text {
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+        .sidebar-brand-name {
+            white-space: nowrap;
+            overflow: visible;
+        }
+        .sidebar-sub {
+            font-size: 10px;
+            color: var(--text-muted);
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            display: block;
+            margin-top: 3px;
+            font-family: 'Raleway', sans-serif;
+            white-space: nowrap;
+        }
+
+        .sidebar a {
+            display: flex; align-items: center; gap: 10px; padding: 10px 12px;
+            border-radius: 8px; color: var(--text-muted); text-decoration: none;
+            font-size: 13px; font-weight: 500; letter-spacing: 0.04em;
+            margin-bottom: 2px; transition: all 0.2s; white-space: nowrap;
+        }
+        .sidebar a:hover { background: var(--gold-dim); color: var(--gold); }
+        .sidebar a.active { background: var(--gold-dim); color: var(--gold); border-left: 2px solid var(--gold); }
+        .sidebar a i { font-size: 16px; width: 20px; flex-shrink: 0; }
+        .sidebar-logout { margin-top: auto; padding-top: 16px; border-top: 1px solid var(--border); }
+        .sidebar-logout a { color: #c0392b !important; }
+        .sidebar-logout a:hover { background: rgba(192,57,43,0.1) !important; color: #e74c3c !important; }
+
+        /* ── HAMBURGER ── */
+        .hamburger {
+            display: none;
+            position: fixed; top: 16px; left: 16px;
+            z-index: 300;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--gold);
+            width: 40px; height: 40px;
+            border-radius: 8px;
+            align-items: center; justify-content: center;
+            cursor: pointer; font-size: 20px;
+        }
+        .sidebar-overlay {
+            display: none;
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 150;
+        }
+        .sidebar-overlay.open { display: block; }
+
+        /* ── MAIN ── */
+        .main { margin-left: 240px; flex: 1; padding: 44px 40px; }
+
+        .page-header { margin-bottom: 38px; }
+        .page-header h1 {
+            font-family: 'Cinzel', serif; font-size: 1.9rem;
+            color: var(--text); font-weight: 300; letter-spacing: 2px;
+        }
+        .page-header h1 span { color: var(--gold); }
+        .page-header p {
+            color: var(--text-muted); margin-top: 8px;
+            font-size: 0.82rem; letter-spacing: 1.5px; text-transform: uppercase;
+        }
+        .gold-line { width: 48px; height: 1px; background: var(--gold); opacity: 0.4; margin: 14px 0 0; }
+
+        .section-title {
+            font-family: 'Cinzel', serif; font-size: 0.9rem; color: var(--gold);
+            letter-spacing: 3px; text-transform: uppercase;
+            font-weight: 400; margin-bottom: 18px; opacity: 0.8;
+        }
+
+        /* ── ACTIONS ── */
+        .actions-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 42px; }
+        .action-card {
+            background: var(--surface); border: 1px solid var(--border);
+            padding: 22px 18px; text-align: center; text-decoration: none;
+            color: var(--text-muted); transition: all 0.25s; display: block; border-radius: 12px;
+        }
+        .action-card:hover {
+            border-color: var(--gold-border); color: var(--gold);
+            background: var(--surface2); transform: translateY(-3px);
+        }
+        .action-card i {
+            font-size: 26px; display: block; margin-bottom: 10px;
+            color: var(--gold); opacity: 0.7; transition: opacity 0.25s;
+        }
+        .action-card:hover i { opacity: 1; }
+        .action-label { font-family: 'Cinzel', serif; font-size: 0.72rem; letter-spacing: 2px; text-transform: uppercase; }
+
+        /* ── TABLE ── */
+        .table-section {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 14px; overflow: hidden;
+        }
+        .table-header {
+            padding: 18px 25px; border-bottom: 1px solid var(--border);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .table-header h3 {
+            font-family: 'Cinzel', serif; font-size: 0.85rem; color: var(--text);
+            font-weight: 400; letter-spacing: 2px; text-transform: uppercase;
+        }
+        .table-header a { font-size: 0.75rem; color: var(--gold); text-decoration: none; letter-spacing: 1px; }
+        table { width: 100%; border-collapse: collapse; }
+        thead th {
+            padding: 11px 25px; text-align: left; font-family: 'Cinzel', serif;
+            font-size: 0.68rem; color: var(--text-muted); text-transform: uppercase;
+            letter-spacing: 2px; background: var(--surface2); font-weight: 400;
+        }
+        tbody tr { border-top: 1px solid var(--border); transition: background 0.15s; }
+        tbody tr:hover { background: var(--surface2); }
+        tbody td { padding: 14px 25px; font-size: 0.85rem; color: var(--text-sub); }
+
+        .status-badge {
+            display: inline-block; padding: 3px 10px; border-radius: 20px;
+            font-size: 0.7rem; font-family: 'Cinzel', serif;
+            letter-spacing: 1px; text-transform: uppercase;
+        }
+        .status-active  { background: var(--green-dim); color: var(--green); border: 1px solid rgba(39,174,96,0.3); }
+        .status-pending { background: var(--gold-dim);  color: var(--gold);  border: 1px solid var(--gold-border); }
+        .status-paid    { background: rgba(100,160,220,0.1); color: #64a0dc; border: 1px solid rgba(100,160,220,0.3); }
+
+        .empty-state { text-align: center; padding: 40px; color: var(--text-muted); font-size: 0.85rem; letter-spacing: 1px; }
+        .empty-state a { color: var(--gold); text-decoration: none; }
+
+        /* ── MOBILE CARDS ── */
+        .mobile-clients { display: none; }
+        .client-mobile-card { padding: 16px 20px; border-bottom: 1px solid var(--border); }
+        .client-mobile-card:last-child { border-bottom: none; }
+        .client-mobile-name { font-family: 'Cinzel', serif; font-size: 0.9rem; color: var(--text); margin-bottom: 6px; }
+        .client-mobile-email { font-size: 0.78rem; color: var(--text-muted); margin-bottom: 8px; }
+        .client-mobile-row { display: flex; align-items: center; justify-content: space-between; }
+
+        /* ── SOCIAL ── */
+        .fixed-social {
+            position: fixed; bottom: 28px; right: 18px;
+            display: flex; flex-direction: column; gap: 10px; z-index: 300;
+        }
+        .fixed-social a {
+            width: 46px; height: 46px;
+            border: 1px solid var(--gold-border);
+            background: rgba(8,8,8,0.85); backdrop-filter: blur(12px);
+            display: flex; align-items: center; justify-content: center;
+            color: var(--gold); font-size: 20px; text-decoration: none;
+            transition: border-color 0.3s, background 0.3s, transform 0.3s;
+        }
+        .fixed-social a:hover {
+            border-color: var(--gold); background: var(--gold-dim); transform: scale(1.1);
+        }
+
+        /* ── RESPONSIVE ── */
+        @media (max-width: 768px) {
+            .hamburger { display: flex; }
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.open { transform: translateX(0); }
+            .main { margin-left: 0; padding: 72px 16px 32px; }
+            .page-header h1 { font-size: 1.4rem; }
+            .actions-grid { grid-template-columns: repeat(3, 1fr); gap: 10px; }
+            .action-card { padding: 16px 10px; }
+            .action-card i { font-size: 22px; }
+            .action-label { font-size: 0.62rem; letter-spacing: 1px; }
+            .desktop-table { display: none; }
+            .mobile-clients { display: block; }
+            .fixed-social { bottom: 20px; right: 14px; }
+        }
+        @media (max-width: 380px) { .actions-grid { grid-template-columns: 1fr 1fr; } }
+    </style>
+</head>
+<body>
+
+<!-- Social -->
+<div class="fixed-social">
+    <a href="https://instagram.com/dreamgalleryphoto" target="_blank" aria-label="Instagram">
+        <i class="ti ti-brand-instagram"></i>
+    </a>
+    <a href="https://wa.me/919876543210?text=Hi! I'm interested in your photography services." target="_blank" aria-label="WhatsApp">
+        <i class="ti ti-brand-whatsapp"></i>
+    </a>
+</div>
+
+<!-- Hamburger -->
+<button class="hamburger" id="hamburgerBtn" onclick="toggleSidebar()" aria-label="Menu">
+    <i class="ti ti-menu-2"></i>
+</button>
+<div class="sidebar-overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+<!-- Sidebar -->
+<div class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+        <i class="ti ti-camera" aria-hidden="true"></i>
+        <div class="sidebar-brand-text">
+            <span class="sidebar-brand-name">DREAM GALLERY</span>
+            <span class="sidebar-sub" th:text="${owner != null ? owner.name : 'Admin'}">Admin</span>
+        </div>
+    </div>
+    <a href="/dashboard" class="active"><i class="ti ti-home"></i> Dashboard</a>
+    <a href="/clients"><i class="ti ti-users"></i> Clients</a>
+    <a href="/owner/packages"><i class="ti ti-package"></i> Packages</a>
+    <a href="/owner/profile"><i class="ti ti-user"></i> Profile</a>
+    <div class="sidebar-logout">
+        <a href="/logout"><i class="ti ti-logout"></i> Logout</a>
+    </div>
+</div>
+
+<!-- Main -->
+<main class="main">
+    <div class="page-header">
+        <h1>Welcome back<span th:if="${owner != null}">, <span th:text="${owner.name}">Admin</span></span></h1>
+        <div class="gold-line"></div>
+        <p>Your photography business overview</p>
+    </div>
+
+    <div class="section-title">Quick Actions</div>
+    <div class="actions-grid">
+        <a href="/clients/add" class="action-card">
+            <i class="ti ti-user-plus"></i>
+            <div class="action-label">Add Client</div>
+        </a>
+        <a href="/clients" class="action-card">
+            <i class="ti ti-camera"></i>
+            <div class="action-label">Upload Photos</div>
+        </a>
+        <a href="/owner/profile" class="action-card">
+            <i class="ti ti-settings"></i>
+            <div class="action-label">Profile</div>
+        </a>
+    </div>
+
+    <div class="table-section">
+        <div class="table-header">
+            <h3>Recent Clients</h3>
+            <a href="/clients">View All →</a>
+        </div>
+
+        <!-- Desktop table -->
+        <div class="desktop-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Couple Name</th>
+                        <th>Email</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:if="${recentClients == null or #lists.isEmpty(recentClients)}">
+                        <td colspan="5" class="empty-state">
+                            No clients yet — <a href="/clients/add">Add your first client</a>
+                        </td>
+                    </tr>
+                    <tr th:each="client, stat : ${recentClients}" th:if="${stat.index < 5}">
+                        <td th:text="${stat.index + 1}">1</td>
+                        <td th:text="${client.coupleName}">Couple Name</td>
+                        <td th:text="${client.email}">email@example.com</td>
+                        <td>
+                            <span class="status-badge"
+                                  th:classappend="${client.status == 'paid'} ? 'status-paid' : (${client.status == 'pending'} ? 'status-pending' : 'status-active')"
+                                  th:text="${client.status != null ? client.status : 'active'}">active</span>
+                        </td>
+                        <td>
+                            <a th:href="@{/clients/{id}(id=${client.id})}"
+                               style="color:var(--gold);text-decoration:none;font-size:0.8rem;letter-spacing:1px;">View →</a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Mobile cards -->
+        <div class="mobile-clients">
+            <div th:if="${recentClients == null or #lists.isEmpty(recentClients)}" class="empty-state">
+                No clients yet — <a href="/clients/add">Add your first client</a>
+            </div>
+            <div class="client-mobile-card" th:each="client, stat : ${recentClients}" th:if="${stat.index < 5}">
+                <div class="client-mobile-name" th:text="${client.coupleName}">Couple Name</div>
+                <div class="client-mobile-email" th:text="${client.email}">email@example.com</div>
+                <div class="client-mobile-row">
+                    <span class="status-badge"
+                          th:classappend="${client.status == 'paid'} ? 'status-paid' : (${client.status == 'pending'} ? 'status-pending' : 'status-active')"
+                          th:text="${client.status != null ? client.status : 'active'}">active</span>
+                    <a th:href="@{/clients/{id}(id=${client.id})}"
+                       style="color:var(--gold);text-decoration:none;font-size:0.8rem;letter-spacing:1px;">View →</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+    function toggleSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('overlay');
+        const btn = document.getElementById('hamburgerBtn');
+        const isOpen = sidebar.classList.toggle('open');
+        overlay.classList.toggle('open');
+        btn.innerHTML = isOpen
+            ? '<i class="ti ti-x"></i>'
+            : '<i class="ti ti-menu-2"></i>';
+    }
+
+    // Close sidebar on Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            const sidebar = document.getElementById('sidebar');
+            if (sidebar.classList.contains('open')) toggleSidebar();
+        }
+    });
+</script>
+</body>
+</html>

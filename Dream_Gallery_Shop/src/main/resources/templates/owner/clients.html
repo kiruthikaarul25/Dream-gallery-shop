@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clients — Dream Gallery Photography</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@300;400;600&family=Raleway:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Raleway',sans-serif;background:#080808;color:#fff;min-height:100vh;display:flex}
+
+        /* SIDEBAR */
+        .sidebar{position:fixed;left:0;top:0;bottom:0;width:220px;background:#0a0a0a;border-right:1px solid rgba(212,175,55,0.1);display:flex;flex-direction:column;z-index:500;transition:transform 0.3s}
+        .sidebar-brand{padding:26px 20px 22px;border-bottom:1px solid rgba(212,175,55,0.1);margin-bottom:16px}
+        .sidebar-brand h2{font-family:'Cinzel',serif;font-size:1rem;font-weight:400;letter-spacing:3px;color:#D4AF37}
+        .sidebar-brand p{font-size:0.6rem;letter-spacing:3px;text-transform:uppercase;color:#333;margin-top:3px}
+        .sidebar-nav{flex:1;padding:0 8px}
+        .nav-section{padding:14px 12px 6px;font-size:0.6rem;letter-spacing:3px;text-transform:uppercase;color:#333}
+        .nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;margin-bottom:2px;border-radius:10px;text-decoration:none;color:#444;font-size:0.75rem;letter-spacing:1.5px;text-transform:uppercase;border:1px solid transparent;transition:all 0.25s}
+        .nav-item i{font-size:1rem;flex-shrink:0}
+        .nav-item:hover,.nav-item.active{color:#D4AF37;background:rgba(212,175,55,0.07);border-color:rgba(212,175,55,0.12)}
+        .sidebar-footer{padding:16px 8px;border-top:1px solid rgba(212,175,55,0.1)}
+        .logout-btn{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;color:#555;text-decoration:none;font-size:0.75rem;letter-spacing:1.5px;text-transform:uppercase;border:1px solid transparent;transition:all 0.25s}
+        .logout-btn:hover{color:#e74c3c;background:rgba(231,76,60,0.06);border-color:rgba(231,76,60,0.12)}
+
+        /* OVERLAY */
+        .sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:399}
+        .sidebar-overlay.open{display:block}
+
+        /* HAMBURGER */
+        .hamburger{display:none;position:fixed;top:16px;left:16px;z-index:200;background:#0a0a0a;border:1px solid rgba(212,175,55,0.2);border-radius:8px;color:#D4AF37;width:40px;height:40px;align-items:center;justify-content:center;cursor:pointer;font-size:1.1rem}
+
+        /* MAIN */
+        .main{margin-left:220px;flex:1;padding:36px 28px;min-height:100vh}
+
+        /* PAGE TOP */
+        .page-top{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:28px;flex-wrap:wrap}
+        .page-top h4{font-family:'Cinzel',serif;font-size:1.2rem;font-weight:300;letter-spacing:3px;color:#fff}
+        .page-top h4 span{color:#D4AF37}
+        .btn-add{display:inline-flex;align-items:center;gap:7px;padding:10px 22px;border-radius:40px;border:1px solid rgba(212,175,55,0.45);background:transparent;color:#D4AF37;text-decoration:none;font-family:'Cinzel',serif;font-size:0.72rem;letter-spacing:2px;text-transform:uppercase;transition:all 0.3s}
+        .btn-add:hover{background:#D4AF37;color:#000;border-color:#D4AF37}
+        .btn-add i{font-size:1rem}
+
+        /* TABLE CARD */
+        .table-card{background:#0e0e0e;border:1px solid rgba(212,175,55,0.12);border-radius:18px;overflow:hidden}
+        .table-wrap{overflow-x:auto}
+        table{width:100%;border-collapse:collapse}
+        thead tr{border-bottom:1px solid rgba(212,175,55,0.1)}
+        thead th{padding:14px 18px;font-family:'Cinzel',serif;font-size:0.65rem;letter-spacing:2px;text-transform:uppercase;color:#444;font-weight:400;white-space:nowrap}
+        tbody tr{border-bottom:1px solid rgba(255,255,255,0.03);transition:background 0.2s}
+        tbody tr:last-child{border-bottom:none}
+        tbody tr:hover{background:rgba(212,175,55,0.03)}
+        tbody td{padding:14px 18px;font-size:0.83rem;font-weight:300;color:#888;vertical-align:middle;white-space:nowrap}
+        .couple-name{font-family:'Cinzel',serif;font-size:0.82rem;color:#ccc;letter-spacing:1px}
+
+        /* BADGES */
+        .badge{display:inline-flex;align-items:center;gap:5px;padding:4px 12px;border-radius:30px;font-size:0.68rem;letter-spacing:1.5px;text-transform:uppercase;font-weight:500}
+        .badge-pending{background:rgba(255,193,7,0.08);color:#ffc107;border:1px solid rgba(255,193,7,0.2)}
+        .badge-active{background:rgba(100,200,220,0.08);color:#64c8dc;border:1px solid rgba(100,200,220,0.2)}
+        .badge-selecting{background:rgba(212,175,55,0.08);color:#D4AF37;border:1px solid rgba(212,175,55,0.2)}
+        .badge-paid{background:rgba(76,175,80,0.08);color:#4caf50;border:1px solid rgba(76,175,80,0.2)}
+        .badge-done{background:rgba(150,150,150,0.08);color:#777;border:1px solid rgba(150,150,150,0.15)}
+        .badge i{font-size:0.7rem}
+
+        /* ACTIONS */
+        .btn-view{display:inline-flex;align-items:center;gap:5px;padding:6px 14px;border-radius:30px;border:1px solid rgba(212,175,55,0.18);color:#555;text-decoration:none;font-size:0.7rem;letter-spacing:1px;text-transform:uppercase;transition:all 0.25s}
+        .btn-view:hover{border-color:rgba(212,175,55,0.5);color:#D4AF37}
+        .btn-view i{font-size:0.85rem}
+
+        /* EMPTY */
+        .empty-row td{padding:60px 20px;text-align:center}
+        .empty-icon{font-size:2rem;color:rgba(212,175,55,0.15);margin-bottom:12px}
+        .empty-text{font-family:'Cinzel',serif;font-size:0.75rem;letter-spacing:2px;color:#333;margin-bottom:12px}
+        .empty-link{color:#D4AF37;text-decoration:none;font-size:0.75rem;letter-spacing:1px;border-bottom:1px solid rgba(212,175,55,0.3)}
+        .empty-link:hover{border-color:#D4AF37}
+
+        /* MOBILE CLIENT CARDS */
+        .mobile-cards{display:none}
+        .mob-client-card{padding:16px 18px;border-bottom:1px solid rgba(255,255,255,0.04);transition:background 0.2s}
+        .mob-client-card:last-child{border-bottom:none}
+        .mob-client-card:hover{background:rgba(212,175,55,0.03)}
+        .mob-client-name{font-family:'Cinzel',serif;font-size:0.88rem;color:#ccc;letter-spacing:1px;margin-bottom:4px}
+        .mob-client-meta{font-size:0.75rem;color:#555;margin-bottom:10px}
+        .mob-client-row{display:flex;align-items:center;justify-content:space-between}
+
+        /* RESPONSIVE */
+        @media(max-width:768px){
+            .sidebar{transform:translateX(-100%)}
+            .sidebar.open{transform:translateX(0)}
+            .main{margin-left:0;padding:72px 14px 32px}
+            .desktop-table{display:none}
+            .mobile-cards{display:block}
+        }
+
+        /* ── MOBILE TOP BAR ── */
+        .mobile-topbar {
+            display: none;
+            position: fixed; top: 0; left: 0; right: 0;
+            z-index: 400;
+            height: 56px;
+            background: rgba(8,8,8,0.95);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(212,175,55,0.15);
+            align-items: center;
+            padding: 0 14px;
+            gap: 12px;
+        }
+        .mobile-topbar-btn {
+            background: transparent;
+            border: 1px solid rgba(212,175,55,0.25);
+            border-radius: 8px;
+            color: #D4AF37;
+            width: 36px; height: 36px;
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; font-size: 1.1rem; flex-shrink: 0;
+        }
+        .mobile-topbar-title {
+            font-family: 'Cinzel', serif;
+            font-size: 0.88rem; letter-spacing: 2px; color: #D4AF37;
+        }
+        .mobile-topbar-title span { color: #fff; }
+        @media(max-width:768px) { .mobile-topbar { display: flex; } }
+    </style>
+</head>
+<body>
+<!-- MOBILE TOP BAR -->
+<div class="mobile-topbar">
+    <button class="mobile-topbar-btn" id="mobMenuBtn" onclick="toggleSidebar()">
+        <i class="ti ti-menu-2" id="mobMenuIcon"></i>
+    </button>
+    <span class="mobile-topbar-title">All <span>Clients</span></span>
+</div>
+
+
+<!-- Hamburger -->
+<div class="sidebar-overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand"><h2>Dream Gallery</h2><p>Admin Panel</p></div>
+    <nav class="sidebar-nav">
+        <div class="nav-section">Main</div>
+        <a th:href="@{/dashboard}" class="nav-item"><i class="ti ti-layout-dashboard"></i>Dashboard</a>
+        <a th:href="@{/clients}" class="nav-item active"><i class="ti ti-users"></i>Clients</a>
+        <div class="nav-section">Business</div>
+        <a th:href="@{/owner/packages}" class="nav-item"><i class="ti ti-diamond"></i>Packages</a>
+
+        <a th:href="@{/owner/profile}" class="nav-item"><i class="ti ti-user-circle"></i>Profile</a>
+    </nav>
+    <div class="sidebar-footer">
+        <a th:href="@{/logout}" class="logout-btn"><i class="ti ti-logout"></i>Logout</a>
+    </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+    <div class="page-top">
+        <h4>All <span>Clients</span></h4>
+        <a th:href="@{/clients/add}" class="btn-add"><i class="ti ti-user-plus"></i>Add Client</a>
+    </div>
+
+    <div class="table-card">
+
+        <!-- Desktop Table -->
+        <div class="table-wrap desktop-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Couple Name</th>
+                        <th>Phone</th>
+                        <th>Wedding Date</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="client : ${clients}">
+                        <td><span class="couple-name" th:text="${client.coupleName}"></span></td>
+                        <td th:text="${client.phone}"></td>
+                        <td th:text="${client.weddingDate}"></td>
+                        <td>
+                            <span class="badge"
+                                th:classappend="${client.status == 'pending'} ? 'badge-pending' :
+                                               (${client.status == 'active'}    ? 'badge-active'    :
+                                               (${client.status == 'selecting'} ? 'badge-selecting' :
+                                               (${client.status == 'paid'}      ? 'badge-paid'      : 'badge-done')))">
+                                <i class="ti"
+                                   th:classappend="${client.status == 'pending'}    ? 'ti-clock'        :
+                                                  (${client.status == 'active'}    ? 'ti-circle-check' :
+                                                  (${client.status == 'selecting'} ? 'ti-photo'        :
+                                                  (${client.status == 'paid'}      ? 'ti-coin'         : 'ti-check')))">
+                                </i>
+                                <span th:text="${client.status}"></span>
+                            </span>
+                        </td>
+                        <td>
+                            <a th:href="@{/clients/{id}(id=${client.id})}" class="btn-view">
+                                <i class="ti ti-eye"></i>View
+                            </a>
+                        </td>
+                    </tr>
+                    <tr class="empty-row" th:if="${#lists.isEmpty(clients)}">
+                        <td colspan="5">
+                            <div class="empty-icon"><i class="ti ti-users"></i></div>
+                            <div class="empty-text">No clients yet</div>
+                            <a th:href="@{/clients/add}" class="empty-link">Add your first client</a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Mobile Cards -->
+        <div class="mobile-cards">
+            <div th:if="${#lists.isEmpty(clients)}" style="padding:48px 20px;text-align:center">
+                <div class="empty-icon"><i class="ti ti-users"></i></div>
+                <div class="empty-text">No clients yet</div>
+                <a th:href="@{/clients/add}" class="empty-link">Add your first client</a>
+            </div>
+            <div class="mob-client-card" th:each="client : ${clients}">
+                <div class="mob-client-name" th:text="${client.coupleName}">Couple Name</div>
+                <div class="mob-client-meta">
+                    <span th:text="${client.phone}">Phone</span>
+                    <span th:if="${client.weddingDate != null}"> · <span th:text="${client.weddingDate}"></span></span>
+                </div>
+                <div class="mob-client-row">
+                    <span class="badge"
+                        th:classappend="${client.status == 'pending'} ? 'badge-pending' :
+                                       (${client.status == 'active'}    ? 'badge-active'    :
+                                       (${client.status == 'selecting'} ? 'badge-selecting' :
+                                       (${client.status == 'paid'}      ? 'badge-paid'      : 'badge-done')))">
+                        <i class="ti"
+                           th:classappend="${client.status == 'pending'}    ? 'ti-clock'        :
+                                          (${client.status == 'active'}    ? 'ti-circle-check' :
+                                          (${client.status == 'selecting'} ? 'ti-photo'        :
+                                          (${client.status == 'paid'}      ? 'ti-coin'         : 'ti-check')))">
+                        </i>
+                        <span th:text="${client.status}"></span>
+                    </span>
+                    <a th:href="@{/clients/{id}(id=${client.id})}" class="btn-view">
+                        <i class="ti ti-eye"></i>View
+                    </a>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+    
+    function toggleSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('overlay');
+        const icon = document.getElementById('mobMenuIcon');
+        const isOpen = sidebar.classList.toggle('open');
+        overlay.classList.toggle('open');
+        if (icon) icon.className = isOpen ? 'ti ti-x' : 'ti ti-menu-2';
+    }
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            const sidebar = document.getElementById('sidebar');
+            if (sidebar.classList.contains('open')) toggleSidebar();
+        }
+    });
+</script>
+</body>
+</html>

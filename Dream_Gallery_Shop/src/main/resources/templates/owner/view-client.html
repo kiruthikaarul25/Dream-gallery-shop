@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View Client — Dream Gallery Photography</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Raleway:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --gold: #c9a84c; --gold-light: #e2c97e; --gold-dim: rgba(201,168,76,0.12);
+            --gold-border: rgba(201,168,76,0.25); --bg: #080808; --surface: #0e0e0e;
+            --surface2: #141414; --surface3: #1c1c1c; --border: rgba(201,168,76,0.2);
+            --text: #e8e0d0; --text-muted: #6a6050; --text-sub: #9a9080;
+            --green: #27ae60; --green-dim: rgba(39,174,96,0.12); --red: #c0392b;
+        }
+        body { background: var(--bg); color: var(--text); font-family: 'Raleway', sans-serif; min-height: 100vh; }
+
+        .sidebar {
+            width: 240px; min-height: 100vh; background: var(--surface);
+            border-right: 1px solid var(--border); padding: 28px 16px;
+            position: fixed; top: 0; left: 0; display: flex; flex-direction: column;
+            z-index: 100; transition: transform 0.3s ease;
+        }
+        .sidebar-brand {
+            font-family: 'Cinzel', serif; font-size: 15px; font-weight: 700;
+            color: var(--gold); letter-spacing: 0.12em; padding: 0 8px 28px;
+            border-bottom: 1px solid var(--border); margin-bottom: 20px;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .sidebar a {
+            display: flex; align-items: center; gap: 10px; padding: 10px 12px;
+            border-radius: 8px; color: var(--text-muted); text-decoration: none;
+            font-size: 13px; font-weight: 500; letter-spacing: 0.04em;
+            margin-bottom: 2px; transition: all 0.2s;
+        }
+        .sidebar a:hover { background: var(--gold-dim); color: var(--gold); }
+        .sidebar a.active { background: var(--gold-dim); color: var(--gold); border-left: 2px solid var(--gold); }
+        .sidebar-logout { margin-top: auto; padding-top: 16px; border-top: 1px solid var(--border); }
+        .sidebar-logout a { color: #c0392b !important; }
+        .sidebar-logout a:hover { background: rgba(192,57,43,0.1) !important; color: #e74c3c !important; }
+
+        .hamburger {
+            display: none; position: fixed; top: 16px; left: 16px;
+            z-index: 200; background: var(--surface); border: 1px solid var(--border);
+            color: var(--gold); width: 40px; height: 40px; border-radius: 8px;
+            align-items: center; justify-content: center; cursor: pointer; font-size: 20px;
+        }
+        .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 99; }
+
+        .main { margin-left: 240px; padding: 40px 36px; min-height: 100vh; }
+        .page-header { display: flex; align-items: center; gap: 16px; margin-bottom: 32px; }
+        .btn-back {
+            display: flex; align-items: center; gap: 6px; padding: 8px 16px;
+            border-radius: 20px; border: 1px solid var(--border); background: transparent;
+            color: var(--text-muted); font-family: 'Raleway', sans-serif;
+            font-size: 13px; text-decoration: none; transition: all 0.2s;
+        }
+        .btn-back:hover { border-color: var(--gold); color: var(--gold); }
+        .page-title { font-family: 'Cinzel', serif; font-size: 20px; font-weight: 600; color: var(--gold-light); letter-spacing: 0.06em; }
+
+        .layout { display: grid; grid-template-columns: 300px 1fr; gap: 24px; align-items: start; }
+
+        .card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin-bottom: 20px; }
+        .card-top { height: 3px; background: linear-gradient(90deg, var(--gold), transparent); }
+        .card-body { padding: 22px; }
+        .card-title {
+            font-size: 11px; font-weight: 600; letter-spacing: 0.16em;
+            text-transform: uppercase; color: var(--text-muted);
+            margin-bottom: 16px; display: flex; align-items: center; gap: 8px;
+        }
+        .card-title i { color: var(--gold); font-size: 14px; }
+
+        .info-row { display: flex; gap: 10px; font-size: 13px; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
+        .info-row:last-of-type { border-bottom: none; }
+        .info-label { color: var(--text-muted); min-width: 100px; flex-shrink: 0; font-size: 12px; }
+        .info-value { color: var(--text); }
+        .info-value.mono { font-family: 'Courier New', monospace; font-size: 12px; color: var(--gold-light); }
+        .divider { height: 1px; background: var(--border); margin: 16px 0; }
+
+        .action-btn {
+            display: flex; align-items: center; gap: 8px; width: 100%; padding: 10px 14px;
+            border-radius: 9px; font-family: 'Raleway', sans-serif; font-size: 13px;
+            font-weight: 600; text-decoration: none; cursor: pointer; transition: all 0.2s;
+            margin-bottom: 8px; letter-spacing: 0.04em;
+        }
+        .action-btn:last-child { margin-bottom: 0; }
+        .btn-gold { background: transparent; border: 1px solid var(--gold); color: var(--gold); }
+        .btn-gold:hover { background: var(--gold); color: #000; }
+        .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--text-muted); }
+        .btn-outline:hover { border-color: var(--gold); color: var(--gold); }
+        .btn-danger { background: transparent; border: 1px solid rgba(192,57,43,0.4); color: #e07060; }
+        .btn-danger:hover { background: rgba(192,57,43,0.12); border-color: var(--red); color: #e74c3c; }
+
+        .dl-btn {
+            display: flex; align-items: center; justify-content: space-between;
+            width: 100%; padding: 12px 14px; border-radius: 10px;
+            font-family: 'Raleway', sans-serif; font-size: 13px; font-weight: 600;
+            text-decoration: none; margin-bottom: 10px; transition: all 0.2s;
+        }
+        .dl-btn-green { background: var(--green-dim); border: 1px solid rgba(39,174,96,0.3); color: var(--green); }
+        .dl-btn-green:hover { background: rgba(39,174,96,0.2); color: var(--green); }
+        .dl-btn-gold { background: var(--gold-dim); border: 1px solid var(--border); color: var(--gold); }
+        .dl-btn-gold:hover { background: rgba(201,168,76,0.2); color: var(--gold-light); }
+        .dl-badge { background: rgba(255,255,255,0.1); border-radius: 20px; padding: 2px 10px; font-size: 12px; }
+        .dl-summary { font-size: 11px; color: var(--text-muted); text-align: center; margin-top: 6px; }
+
+        .album-section { margin-bottom: 28px; }
+        .album-label {
+            display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600;
+            letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 12px;
+            padding-bottom: 8px; border-bottom: 1px solid var(--border);
+        }
+        .album-label.selected { color: var(--green); }
+        .album-label.unselected { color: var(--text-muted); }
+        .album-label i { font-size: 14px; }
+
+        .photo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; }
+
+        .photo-item {
+            position: relative; border-radius: 8px; overflow: hidden;
+            border: 1px solid var(--border);
+        }
+        .photo-item img {
+            width: 100%; height: 120px; object-fit: cover; display: block;
+            opacity: 0.85; transition: opacity 0.2s;
+        }
+        .photo-item:hover img { opacity: 0.6; }
+        .photo-item.selected-photo { border-color: var(--green); }
+        .photo-item.selected-photo img { opacity: 1; }
+        .photo-item.selected-photo:hover img { opacity: 0.6; }
+        .selected-tick {
+            position: absolute; top: 6px; right: 6px; background: var(--green); color: #fff;
+            border-radius: 50%; width: 22px; height: 22px;
+            display: flex; align-items: center; justify-content: center; font-size: 12px;
+            transition: opacity 0.2s;
+        }
+        .photo-item:hover .selected-tick { opacity: 0; }
+
+        .photo-delete-btn {
+            position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+            opacity: 0; transition: opacity 0.2s; cursor: pointer;
+        }
+        .photo-item:hover .photo-delete-btn { opacity: 1; }
+        @media (hover: none) {
+            .photo-delete-btn { opacity: 1; background: rgba(0,0,0,0.35); }
+            .photo-item:hover .selected-tick { opacity: 1; }
+        }
+        .photo-delete-btn button {
+            background: rgba(192,57,43,0.85); border: 1.5px solid #e74c3c; color: #fff;
+            border-radius: 8px; padding: 7px 14px; font-family: 'Raleway', sans-serif;
+            font-size: 12px; font-weight: 600; cursor: pointer; display: flex;
+            align-items: center; gap: 6px; transition: background 0.15s; backdrop-filter: blur(2px);
+        }
+        .photo-delete-btn button:hover { background: var(--red); }
+
+        .empty-state { text-align: center; padding: 48px 24px; color: var(--text-muted); }
+        .empty-state i { font-size: 36px; color: var(--border); margin-bottom: 12px; display: block; }
+        .empty-state p { font-size: 13px; }
+
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 999; align-items: center; justify-content: center; }
+        .modal-overlay.show { display: flex; }
+        .modal-box {
+            background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+            padding: 28px; width: 520px; max-width: 94vw; max-height: 88vh; overflow-y: auto;
+            animation: fadeUp 0.2s ease;
+        }
+        @keyframes fadeUp { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
+        .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+        .modal-title { font-family: 'Cinzel', serif; font-size: 15px; color: var(--gold); letter-spacing: 0.08em; }
+        .modal-close {
+            background: var(--surface2); border: 1px solid var(--border); color: var(--text-muted);
+            width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center;
+            justify-content: center; cursor: pointer; font-size: 14px; transition: all 0.2s;
+        }
+        .modal-close:hover { border-color: var(--red); color: #e74c3c; }
+        .album-input {
+            width: 100%; background: var(--surface2); border: 1px solid var(--border);
+            border-radius: 9px; padding: 11px 14px; font-family: 'Raleway', sans-serif;
+            font-size: 14px; color: var(--text); outline: none; margin-bottom: 14px; transition: border-color 0.2s;
+        }
+        .album-input::placeholder { color: var(--text-muted); }
+        .album-input:focus { border-color: var(--gold); }
+        .drop-zone {
+            border: 2px dashed var(--border); border-radius: 12px; padding: 36px 16px;
+            text-align: center; background: var(--surface2); cursor: pointer;
+            transition: background 0.2s, border-color 0.2s; margin-bottom: 12px; user-select: none;
+        }
+        .drop-zone:hover, .drop-zone.drag-over { background: var(--gold-dim); border-color: var(--gold); }
+        .drop-icon { color: var(--gold); font-size: 36px; margin-bottom: 10px; }
+        .drop-title { font-family: 'Cinzel', serif; font-size: 13px; color: var(--gold-light); margin-bottom: 6px; }
+        .drop-hint { font-size: 11px; color: var(--text-muted); }
+        .preview-bar {
+            display: none; align-items: center; justify-content: space-between;
+            padding: 8px 12px; background: var(--gold-dim); border: 1px solid var(--border);
+            border-radius: 8px; margin-bottom: 10px;
+        }
+        .preview-bar .count-text { font-size: 13px; font-weight: 600; color: var(--gold); }
+        .preview-bar .clear-btn { font-size: 12px; color: #e07060; background: none; border: none; cursor: pointer; font-family: 'Raleway', sans-serif; }
+        .preview-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 8px; margin-bottom: 14px; }
+        .preview-item { position: relative; border-radius: 7px; overflow: hidden; border: 1px solid var(--border); }
+        .preview-item img { width: 100%; height: 72px; object-fit: cover; display: block; }
+        .remove-btn {
+            position: absolute; top: 3px; right: 3px; background: rgba(0,0,0,0.7); color: #fff;
+            border: none; border-radius: 50%; width: 20px; height: 20px; font-size: 10px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; transition: background 0.15s;
+        }
+        .remove-btn:hover { background: var(--red); }
+        .progress-wrap { display: none; margin-bottom: 12px; }
+        .progress-track { height: 6px; border-radius: 6px; background: var(--surface3); overflow: hidden; }
+        .progress-bar { height: 100%; background: linear-gradient(90deg, var(--gold), var(--gold-light), var(--gold)); background-size: 200% 100%; animation: shimmer 1.2s infinite; border-radius: 6px; width: 100%; }
+        @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+        .progress-text { text-align: center; font-size: 12px; color: var(--text-muted); margin-top: 8px; }
+        .btn-upload-submit {
+            width: 100%; padding: 13px; background: transparent; border: 1px solid var(--gold);
+            color: var(--gold); border-radius: 10px; font-family: 'Cinzel', serif; font-size: 12px;
+            font-weight: 600; letter-spacing: 0.1em; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.25s;
+        }
+        .btn-upload-submit:hover:not(:disabled) { background: var(--gold); color: #000; }
+        .btn-upload-submit:disabled { border-color: var(--border); color: var(--text-muted); cursor: not-allowed; }
+
+        .del-modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 1100; align-items: center; justify-content: center; }
+        .del-modal-overlay.show { display: flex; }
+        .del-modal-box {
+            background: var(--surface); border: 1px solid rgba(192,57,43,0.4); border-radius: 16px;
+            padding: 28px; width: 360px; max-width: 92vw; text-align: center;
+            animation: fadeUp 0.2s ease;
+        }
+        .del-modal-icon { font-size: 40px; color: var(--red); margin-bottom: 14px; }
+        .del-modal-title { font-family: 'Cinzel', serif; font-size: 15px; color: #e07060; margin-bottom: 8px; }
+        .del-modal-sub { font-size: 12px; color: var(--text-muted); margin-bottom: 22px; line-height: 1.6; }
+        .del-modal-actions { display: flex; gap: 10px; }
+        .del-cancel-btn {
+            flex: 1; padding: 11px; background: transparent; border: 1px solid var(--border);
+            color: var(--text-muted); border-radius: 9px; font-family: 'Raleway', sans-serif;
+            font-size: 13px; cursor: pointer; transition: all 0.2s;
+        }
+        .del-cancel-btn:hover { border-color: var(--gold); color: var(--gold); }
+        .del-confirm-btn {
+            flex: 1; padding: 11px; background: rgba(192,57,43,0.15); border: 1px solid var(--red);
+            color: #e74c3c; border-radius: 9px; font-family: 'Raleway', sans-serif;
+            font-size: 13px; font-weight: 600; cursor: pointer; transition: all 0.2s;
+        }
+        .del-confirm-btn:hover { background: var(--red); color: #fff; }
+
+        @media (max-width: 900px) { .layout { grid-template-columns: 1fr; } }
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.open { transform: translateX(0); }
+            .sidebar-overlay.open { display: block; }
+            .hamburger { display: flex; }
+            .main { margin-left: 0; padding: 72px 18px 32px; }
+            .modal-box { position: fixed; bottom: 0; left: 0; right: 0; border-radius: 20px 20px 0 0; max-width: 100%; max-height: 92vh; animation: slideUp 0.28s ease; }
+            .del-modal-box { position: fixed; bottom: 0; left: 0; right: 0; border-radius: 20px 20px 0 0; max-width: 100%; animation: slideUp 0.28s ease; }
+            @keyframes slideUp { from{transform:translateY(100%)} to{transform:translateY(0)} }
+        }
+    </style>
+</head>
+<body>
+
+<button class="hamburger" onclick="toggleSidebar()"><i class="ti ti-menu-2"></i></button>
+<div class="sidebar-overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+<div class="sidebar" id="sidebar">
+    <div class="sidebar-brand"><i class="ti ti-camera"></i> DREAM GALLERY</div>
+    <a th:href="@{/dashboard}" href="#"><i class="ti ti-home"></i> Dashboard</a>
+    <a th:href="@{/clients}" href="#" class="active"><i class="ti ti-users"></i> Clients</a>
+    <a th:href="@{/owner/packages}" href="#"><i class="ti ti-package"></i> Packages</a>
+    <a th:href="@{/owner/profile}" href="#"><i class="ti ti-user"></i> Profile</a>
+    <div class="sidebar-logout">
+        <a th:href="@{/logout}" href="#"><i class="ti ti-logout"></i> Logout</a>
+    </div>
+</div>
+
+<div class="main">
+    <div class="page-header">
+        <a th:href="@{/clients}" href="#" class="btn-back"><i class="ti ti-arrow-left"></i> Back</a>
+        <h1 class="page-title" th:text="${client.coupleName}">Couple Name</h1>
+    </div>
+
+    <div class="layout">
+        <!-- LEFT COLUMN -->
+        <div>
+            <div class="card">
+                <div class="card-top"></div>
+                <div class="card-body">
+                    <p class="card-title"><i class="ti ti-info-circle"></i> Client Info</p>
+                    <div class="info-row"><span class="info-label">Phone</span><span class="info-value" th:text="${client.phone}"></span></div>
+                    <div class="info-row"><span class="info-label">Email</span><span class="info-value" th:text="${client.email}"></span></div>
+                    <div class="info-row"><span class="info-label">Wedding Date</span><span class="info-value" th:text="${client.weddingDate}"></span></div>
+                    <div class="info-row"><span class="info-label">Status</span><span class="info-value" style="color:var(--gold);font-weight:600" th:text="${client.status}"></span></div>
+                    <div class="info-row"><span class="info-label">Username</span><span class="info-value mono" th:text="${client.accessToken}"></span></div>
+                    <div class="info-row"><span class="info-label">Password</span><span class="info-value mono" th:text="${client.accessPassword}"></span></div>
+
+                    <div class="divider"></div>
+
+                    <button type="button" onclick="openUploadModal()" class="action-btn btn-gold">
+                        <i class="ti ti-cloud-upload"></i> Upload Photos
+                    </button>
+                    <a th:href="@{/clients/{id}/edit(id=${client.id})}" href="#" class="action-btn btn-outline">
+                        <i class="ti ti-pencil"></i> Edit Client
+                    </a>
+                    <a th:href="@{/clients/{id}/delete(id=${client.id})}" href="#" class="action-btn btn-danger"
+                       onclick="return confirm('Delete this client?')">
+                        <i class="ti ti-trash"></i> Delete Client
+                    </a>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-top"></div>
+                <div class="card-body">
+                    <p class="card-title"><i class="ti ti-download"></i> Download Photos</p>
+                    <a th:href="@{/owner/clients/{id}/download/selected(id=${client.id})}" href="#" class="dl-btn dl-btn-green">
+                        <span style="display:flex;align-items:center;gap:8px"><i class="ti ti-circle-check"></i> Selected Photos</span>
+                        <span class="dl-badge" th:text="${selectionCount}">0</span>
+                    </a>
+                    <a th:href="@{/owner/clients/{id}/download/unselected(id=${client.id})}" href="#" class="dl-btn dl-btn-gold">
+                        <span style="display:flex;align-items:center;gap:8px"><i class="ti ti-folder"></i> Unselected Photos</span>
+                        <span class="dl-badge" th:text="${photos.size() - selectionCount}">0</span>
+                    </a>
+                    <div class="dl-summary">Total <span th:text="${photos.size()}">0</span> photos</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT COLUMN — PHOTOS -->
+        <div class="card">
+            <div class="card-top"></div>
+            <div class="card-body">
+                <p class="card-title">
+                    <i class="ti ti-photo"></i> Photos
+                    <span style="color:var(--text-muted);font-weight:400;font-size:11px">(<span th:text="${photos.size()}"></span> total)</span>
+                    <span th:if="${selectionCount > 0}"
+                          style="margin-left:8px;padding:2px 10px;border-radius:20px;background:var(--green-dim);color:var(--green);font-size:11px;border:1px solid rgba(39,174,96,0.3)">
+                        <i class="ti ti-check"></i> <span th:text="${selectionCount}"></span> selected
+                    </span>
+                </p>
+
+                <div th:each="album : ${albums}">
+                    <div class="album-section">
+                        <div class="album-label unselected" style="justify-content:space-between">
+                            <div style="display:flex;align-items:center;gap:8px">
+                                <i class="ti ti-folder"></i>
+                                <span th:text="${album.title != null and !#strings.isEmpty(album.title)} ? ${album.title} : 'Untitled Album'"></span>
+                            </div>
+                            <span style="font-size:11px;opacity:0.5"
+                                  th:text="${(selectedPhotos[album.id] != null ? selectedPhotos[album.id].size() : 0) + (unselectedPhotos[album.id] != null ? unselectedPhotos[album.id].size() : 0)} + ' photos'">
+                            </span>
+                        </div>
+                        <div class="photo-grid">
+                            <!-- Selected photos -->
+                            <div class="photo-item selected-photo" th:each="photo : ${selectedPhotos[album.id]}">
+                                <img th:src="${'/'+photo.filePath}" th:alt="${photo.filename}">
+                                <span class="selected-tick"><i class="ti ti-check"></i></span>
+                                <div class="photo-delete-btn">
+                                    <button type="button"
+                                            th:data-photo-id="${photo.id}"
+                                            th:data-photo-name="${photo.filename}"
+                                            onclick="confirmDeletePhoto(this)">
+                                        <i class="ti ti-trash"></i> Remove
+                                    </button>
+                                </div>
+                            </div>
+                            <!-- Unselected photos -->
+                            <div class="photo-item" th:each="photo : ${unselectedPhotos[album.id]}">
+                                <img th:src="${'/'+photo.filePath}" th:alt="${photo.filename}">
+                                <div class="photo-delete-btn">
+                                    <button type="button"
+                                            th:data-photo-id="${photo.id}"
+                                            th:data-photo-name="${photo.filename}"
+                                            onclick="confirmDeletePhoto(this)">
+                                        <i class="ti ti-trash"></i> Remove
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div th:if="${photos.isEmpty()}" class="empty-state">
+                    <i class="ti ti-photo-off"></i>
+                    <p>No photos uploaded yet.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- UPLOAD MODAL -->
+<div class="modal-overlay" id="uploadOverlay" onclick="closeIfOutside(event)">
+    <div class="modal-box" id="uploadModal">
+        <div class="modal-header">
+            <span class="modal-title"><i class="ti ti-cloud-upload"></i> Upload Photos</span>
+            <button class="modal-close" onclick="closeUploadModal()"><i class="ti ti-x"></i></button>
+        </div>
+        <form th:action="@{/owner/upload}" method="post" enctype="multipart/form-data" id="uploadForm">
+            <input type="hidden" name="clientId" th:value="${client.id}"/>
+            <input type="text" name="albumTitle" class="album-input"
+                   placeholder="Album Title (e.g. Wedding Day Highlights)">
+            <div class="drop-zone" id="dropZone">
+                <div class="drop-icon"><i class="ti ti-cloud-upload"></i></div>
+                <div class="drop-title">Tap to select photos</div>
+                <div class="drop-hint">or drag &amp; drop · JPG, PNG, WEBP · Max 20MB each</div>
+                <input type="file" name="files" id="fileInput"
+                       multiple accept="image/jpeg,image/png,image/webp" style="display:none">
+            </div>
+            <div class="preview-bar" id="previewBar">
+                <span class="count-text" id="countText"></span>
+                <button type="button" class="clear-btn" id="clearBtn">Clear all</button>
+            </div>
+            <div class="preview-grid" id="previewGrid"></div>
+            <div class="progress-wrap" id="progressWrap">
+                <div class="progress-track"><div class="progress-bar"></div></div>
+                <div class="progress-text">Uploading, please wait…</div>
+            </div>
+            <button type="submit" class="btn-upload-submit" id="submitBtn" disabled>
+                <i class="ti ti-upload"></i> Upload Photos
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- PHOTO DELETE CONFIRM MODAL -->
+<div class="del-modal-overlay" id="delOverlay">
+    <div class="del-modal-box">
+        <div class="del-modal-icon"><i class="ti ti-photo-off"></i></div>
+        <div class="del-modal-title">Delete Photo?</div>
+        <div class="del-modal-sub" id="delModalSub">This photo will be permanently deleted and cannot be recovered.</div>
+        <div class="del-modal-actions">
+            <button class="del-cancel-btn" onclick="closeDeleteModal()">Cancel</button>
+            <button class="del-confirm-btn" id="delConfirmBtn" onclick="submitDeletePhoto()">
+                <i class="ti ti-trash"></i> Delete
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Hidden delete form — CSRF disabled, no token needed -->
+<form id="deletePhotoForm" method="post" style="display:none">
+    <input type="hidden" name="clientId" th:value="${client.id}"/>
+</form>
+
+<script>
+    function toggleSidebar() {
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('overlay');
+        const btn = document.querySelector('.hamburger');
+        const isOpen = sidebar.classList.toggle('open');
+        overlay.classList.toggle('open');
+        if (btn) btn.innerHTML = isOpen ? '<i class="ti ti-x"></i>' : '<i class="ti ti-menu-2"></i>';
+    }
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            const sidebar = document.getElementById('sidebar');
+            if (sidebar.classList.contains('open')) toggleSidebar();
+        }
+    });
+    function openUploadModal() {
+        document.getElementById('uploadOverlay').classList.add('show');
+        document.body.style.overflow = 'hidden';
+    }
+    function closeUploadModal() {
+        document.getElementById('uploadOverlay').classList.remove('show');
+        document.body.style.overflow = '';
+    }
+    function closeIfOutside(e) {
+        if (e.target === document.getElementById('uploadOverlay')) closeUploadModal();
+    }
+
+    let pendingDeleteId = null;
+
+    function confirmDeletePhoto(btn) {
+        pendingDeleteId = btn.dataset.photoId;
+        const name = btn.dataset.photoName || 'this photo';
+        document.getElementById('delModalSub').textContent =
+            '"' + name + '" will be permanently deleted and cannot be recovered.';
+        document.getElementById('delOverlay').classList.add('show');
+        document.body.style.overflow = 'hidden';
+    }
+    function closeDeleteModal() {
+        pendingDeleteId = null;
+        document.getElementById('delOverlay').classList.remove('show');
+        document.body.style.overflow = '';
+    }
+    function submitDeletePhoto() {
+        if (!pendingDeleteId) return;
+        const form = document.getElementById('deletePhotoForm');
+        form.action = '/owner/photos/' + pendingDeleteId + '/delete';
+        form.submit();
+    }
+    document.getElementById('delOverlay').addEventListener('click', function(e) {
+        if (e.target === this) closeDeleteModal();
+    });
+
+    const fileInput    = document.getElementById('fileInput');
+    const previewGrid  = document.getElementById('previewGrid');
+    const previewBar   = document.getElementById('previewBar');
+    const countText    = document.getElementById('countText');
+    const submitBtn    = document.getElementById('submitBtn');
+    const dropZone     = document.getElementById('dropZone');
+    const clearBtn     = document.getElementById('clearBtn');
+    const progressWrap = document.getElementById('progressWrap');
+    const uploadForm   = document.getElementById('uploadForm');
+    let selectedFiles  = [];
+
+    dropZone.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', () => handleFiles(Array.from(fileInput.files)));
+    dropZone.addEventListener('dragover',  e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+    dropZone.addEventListener('drop', e => {
+        e.preventDefault(); dropZone.classList.remove('drag-over');
+        handleFiles(Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/')));
+    });
+    clearBtn.addEventListener('click', () => { selectedFiles = []; renderPreviews(); syncFileInput(); });
+
+    function handleFiles(files) {
+        files.forEach(f => {
+            if (!selectedFiles.find(x => x.name === f.name && x.size === f.size)) selectedFiles.push(f);
+        });
+        renderPreviews(); syncFileInput();
+    }
+    function renderPreviews() {
+        previewGrid.innerHTML = '';
+        selectedFiles.forEach((file, idx) => {
+            const reader = new FileReader();
+            reader.onload = e => {
+                const item = document.createElement('div');
+                item.className = 'preview-item';
+                item.innerHTML = '<img src="' + e.target.result + '" alt="' + file.name + '">' +
+                    '<button type="button" class="remove-btn" data-idx="' + idx + '">✕</button>';
+                previewGrid.appendChild(item);
+            };
+            reader.readAsDataURL(file);
+        });
+        const count = selectedFiles.length;
+        previewBar.style.display = count > 0 ? 'flex' : 'none';
+        if (count > 0) countText.textContent = count + ' photo' + (count > 1 ? 's' : '') + ' selected';
+        submitBtn.disabled = count === 0;
+    }
+    previewGrid.addEventListener('click', e => {
+        if (e.target.classList.contains('remove-btn')) {
+            selectedFiles.splice(parseInt(e.target.dataset.idx), 1);
+            renderPreviews(); syncFileInput();
+        }
+    });
+    function syncFileInput() {
+        const dt = new DataTransfer();
+        selectedFiles.forEach(f => dt.items.add(f));
+        fileInput.files = dt.files;
+    }
+    uploadForm.addEventListener('submit', () => {
+        submitBtn.disabled = true;
+        progressWrap.style.display = 'block';
+    });
+</script>
+</body>
+</html>

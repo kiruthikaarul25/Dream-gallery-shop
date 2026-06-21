@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Our Work — Dream Gallery Photography</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@300;400;600&family=Raleway:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Raleway', sans-serif; background: #080808; color: #fff; }
+
+        /* SOCIAL FIXED — bottom right, contact page style */
+        .fixed-social {
+            position: fixed;
+            bottom: 90px;
+            right: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 200;
+        }
+        .fixed-social a {
+            width: 46px; height: 46px;
+            border: 1px solid rgba(212,175,55,0.35);
+            background: rgba(8,8,8,0.85);
+            backdrop-filter: blur(12px);
+            display: flex; align-items: center; justify-content: center;
+            color: #D4AF37;
+            font-size: 20px;
+            text-decoration: none;
+            transition: border-color 0.3s, background 0.3s, transform 0.3s;
+        }
+        .fixed-social a:hover {
+            border-color: #D4AF37;
+            background: rgba(212,175,55,0.12);
+            transform: scale(1.1);
+        }
+
+        /* HERO */
+        .page-hero {
+            height: 55vh; min-height: 300px;
+            position: relative; display: flex;
+            align-items: center; justify-content: center; text-align: center; overflow: hidden;
+        }
+        .hero-bg {
+            position: absolute; inset: 0;
+            background: url('https://images.unsplash.com/photo-1511285560929-80b456fea0bc?w=1600&auto=format&fit=crop') center/cover no-repeat;
+            animation: kbZoom 14s ease-in-out infinite alternate;
+        }
+        @keyframes kbZoom { from { transform: scale(1); } to { transform: scale(1.07); } }
+        .hero-overlay {
+            position: absolute; inset: 0;
+            background: linear-gradient(to bottom, rgba(8,8,8,0.4) 0%, rgba(8,8,8,0.65) 55%, rgba(8,8,8,1) 100%);
+        }
+        .hero-content { position: relative; z-index: 2; }
+        .eyebrow {
+            font-family: 'Raleway', sans-serif; font-size: 0.68rem;
+            letter-spacing: 5px; color: #D4AF37; text-transform: uppercase; margin-bottom: 14px;
+        }
+        .hero-content h1 {
+            font-family: 'Cinzel', serif; font-size: clamp(2rem,5vw,3.8rem);
+            font-weight: 300; letter-spacing: 6px; color: #fff;
+        }
+        .hero-content h1 span { color: #D4AF37; }
+        .gold-line {
+            width: 60px; height: 1px;
+            background: linear-gradient(to right, transparent, #D4AF37, transparent);
+            margin: 16px auto 0;
+        }
+
+        /* FILTER BUTTONS */
+        .filter-bar {
+            display: flex; justify-content: center; flex-wrap: wrap;
+            gap: 10px; padding: 40px 20px 24px;
+        }
+        .cat-btn {
+            padding: 8px 22px;
+            border: 1px solid rgba(212,175,55,0.4);
+            background: transparent; color: #D4AF37;
+            border-radius: 40px; cursor: pointer;
+            font-family: 'Cinzel', serif; font-size: 0.7rem;
+            letter-spacing: 2px; text-transform: uppercase;
+            transition: all 0.3s;
+        }
+        .cat-btn:hover, .cat-btn.active {
+            background: #D4AF37; color: #000; border-color: #D4AF37;
+        }
+
+        /* GALLERY MASONRY */
+        .gallery-section { padding: 10px 20px; max-width: 1200px; margin: 0 auto; }
+        .gallery-grid { columns: 3; column-gap: 12px; }
+        @media(max-width: 768px) { .gallery-grid { columns: 2; } }
+        @media(max-width: 480px) { .gallery-grid { columns: 1; } }
+
+        .gallery-item {
+            break-inside: avoid; margin-bottom: 12px;
+            border-radius: 14px; overflow: hidden;
+            position: relative; cursor: pointer;
+            border: 1px solid rgba(212,175,55,0.08);
+            transition: border-color 0.3s;
+        }
+        .gallery-item:hover { border-color: rgba(212,175,55,0.4); }
+        .gallery-item img {
+            width: 100%; display: block;
+            transition: transform 0.6s ease;
+            pointer-events: none; user-select: none; -webkit-user-drag: none;
+        }
+        .gallery-item:hover img { transform: scale(1.06); }
+        .gallery-item .overlay {
+            position: absolute; inset: 0;
+            background: linear-gradient(transparent 45%, rgba(8,8,8,0.8));
+            opacity: 0; transition: opacity 0.35s;
+            display: flex; align-items: flex-end; padding: 16px;
+        }
+        .gallery-item:hover .overlay { opacity: 1; }
+        .overlay-label {
+            font-family: 'Cinzel', serif;
+            font-size: 0.7rem; letter-spacing: 2px;
+            color: #D4AF37; text-transform: uppercase;
+        }
+
+        /* ABOUT */
+        .about-section {
+            padding: 80px 20px 50px; max-width: 820px;
+            margin: 0 auto; text-align: center;
+        }
+        .section-eyebrow {
+            font-family: 'Raleway', sans-serif; font-size: 0.68rem;
+            letter-spacing: 5px; color: #D4AF37;
+            text-transform: uppercase; margin-bottom: 14px;
+        }
+        .about-section h2 {
+            font-family: 'Cinzel', serif; font-size: clamp(1.6rem,3vw,2.6rem);
+            font-weight: 300; letter-spacing: 4px; color: #fff; margin-bottom: 24px;
+        }
+        .about-section p {
+            color: #888; font-weight: 300; line-height: 1.95;
+            font-size: 0.95rem; margin-bottom: 14px;
+        }
+
+        /* STATS */
+        .stats {
+            display: grid; grid-template-columns: repeat(3,1fr);
+            gap: 16px; max-width: 680px; margin: 50px auto; padding: 0 20px;
+        }
+        @media(max-width:480px) { .stats { grid-template-columns: 1fr; } }
+        .stat-item {
+            text-align: center; padding: 30px 16px;
+            background: #0e0e0e; border-radius: 16px;
+            border: 1px solid rgba(212,175,55,0.15);
+            transition: border-color 0.3s, transform 0.3s;
+        }
+        .stat-item:hover { border-color: rgba(212,175,55,0.5); transform: translateY(-4px); }
+        .stat-item h3 {
+            font-family: 'Cinzel', serif; font-size: 2.2rem;
+            font-weight: 400; color: #D4AF37;
+        }
+        .stat-item p {
+            font-family: 'Raleway', sans-serif; color: #666;
+            font-size: 0.75rem; letter-spacing: 2px;
+            text-transform: uppercase; margin-top: 6px;
+        }
+
+        /* TESTIMONIALS */
+        .testimonials { padding: 60px 20px; background: #0b0b0b; }
+        .testimonials .section-eyebrow { text-align: center; }
+        .testimonials h2 {
+            font-family: 'Cinzel', serif; font-size: clamp(1.4rem,3vw,2.2rem);
+            font-weight: 300; letter-spacing: 4px; color: #fff;
+            text-align: center; margin-bottom: 40px;
+        }
+        .testimonial-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(270px,1fr));
+            gap: 18px; max-width: 1000px; margin: 0 auto;
+        }
+        .t-card {
+            background: #111; border-radius: 16px; padding: 28px;
+            border: 1px solid rgba(212,175,55,0.12);
+            transition: transform 0.3s, border-color 0.3s;
+        }
+        .t-card:hover { transform: translateY(-5px); border-color: rgba(212,175,55,0.4); }
+        .stars { color: #D4AF37; font-size: 0.9rem; letter-spacing: 3px; margin-bottom: 14px; }
+        .t-card p {
+            color: #888; font-size: 0.88rem;
+            line-height: 1.75; font-style: italic; font-weight: 300;
+        }
+        .t-name {
+            margin-top: 16px; color: #D4AF37;
+            font-family: 'Cinzel', serif; font-size: 0.78rem;
+            letter-spacing: 1px; font-style: normal;
+        }
+
+        /* BOTTOM NAV */
+        .spacer { height: 80px; }
+        .bottom-nav {
+            position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+            background: rgba(8,8,8,0.95); backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(212,175,55,0.15);
+            padding: 10px 0 max(10px, env(safe-area-inset-bottom));
+        }
+        .bottom-nav ul {
+            display: flex; justify-content: space-around;
+            list-style: none; max-width: 520px; margin: 0 auto;
+        }
+        .bottom-nav ul li a {
+            display: flex; flex-direction: column; align-items: center; gap: 4px;
+            text-decoration: none; color: #444;
+            font-family: 'Cinzel', serif; font-size: 8px;
+            letter-spacing: 2px; text-transform: uppercase;
+            transition: color 0.3s; padding: 4px 8px;
+        }
+        .bottom-nav ul li a i { font-size: 20px; }
+        .bottom-nav ul li a:hover, .bottom-nav ul li a.active { color: #D4AF37; }
+    </style>
+</head>
+<body>
+
+<!-- SOCIAL — bottom right, above bottom nav -->
+<div class="fixed-social">
+    <a href="https://instagram.com/dreamgalleryphoto" target="_blank" aria-label="Instagram">
+        <i class="ti ti-brand-instagram"></i>
+    </a>
+    <a href="https://wa.me/919999999999?text=Hi! I'm interested in your photography services." target="_blank" aria-label="WhatsApp">
+        <i class="ti ti-brand-whatsapp"></i>
+    </a>
+</div>
+
+<!-- HERO -->
+<div class="page-hero">
+    <div class="hero-bg"></div>
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+        <p class="eyebrow">Dream Gallery Photography</p>
+        <h1>Our <span>Work</span></h1>
+        <div class="gold-line"></div>
+    </div>
+</div>
+
+<!-- FILTER -->
+<div class="filter-bar">
+    <button class="cat-btn active" data-cat="all">All</button>
+    <button class="cat-btn" data-cat="wedding">Wedding</button>
+    <button class="cat-btn" data-cat="prewedding">Pre-Wedding</button>
+    <button class="cat-btn" data-cat="reception">Reception</button>
+    <button class="cat-btn" data-cat="portrait">Portrait</button>
+</div>
+
+<!-- GALLERY -->
+<div class="gallery-section">
+    <div class="gallery-grid">
+        <div class="gallery-item" data-cat="wedding">
+            <img src="https://images.unsplash.com/photo-1519741497674-611481863552?w=600&auto=format&fit=crop" alt="Wedding">
+            <div class="overlay"><span class="overlay-label">Wedding</span></div>
+        </div>
+        <div class="gallery-item" data-cat="prewedding">
+            <img src="https://images.unsplash.com/photo-1606216794074-735e91aa2c92?w=600&auto=format&fit=crop" alt="Pre-Wedding">
+            <div class="overlay"><span class="overlay-label">Pre-Wedding</span></div>
+        </div>
+        <div class="gallery-item" data-cat="wedding">
+            <img src="https://images.unsplash.com/photo-1511285560929-80b456fea0bc?w=600&auto=format&fit=crop" alt="Wedding">
+            <div class="overlay"><span class="overlay-label">Wedding</span></div>
+        </div>
+        <div class="gallery-item" data-cat="reception">
+            <img src="https://images.unsplash.com/photo-1583939003579-730e3918a45a?w=600&auto=format&fit=crop" alt="Reception">
+            <div class="overlay"><span class="overlay-label">Reception</span></div>
+        </div>
+        <div class="gallery-item" data-cat="portrait">
+            <img src="https://images.unsplash.com/photo-1537633552985-df8429e8048b?w=600&auto=format&fit=crop" alt="Portrait">
+            <div class="overlay"><span class="overlay-label">Portrait</span></div>
+        </div>
+        <div class="gallery-item" data-cat="prewedding">
+            <img src="https://images.unsplash.com/photo-1465495976277-4387d4b0b4c6?w=600&auto=format&fit=crop" alt="Pre-Wedding">
+            <div class="overlay"><span class="overlay-label">Pre-Wedding</span></div>
+        </div>
+        <div class="gallery-item" data-cat="wedding">
+            <img src="https://images.unsplash.com/photo-1550005809-91ad75fb315f?w=600&auto=format&fit=crop" alt="Wedding">
+            <div class="overlay"><span class="overlay-label">Wedding</span></div>
+        </div>
+        <div class="gallery-item" data-cat="reception">
+            <img src="https://images.unsplash.com/photo-1529636798458-92182e662485?w=600&auto=format&fit=crop" alt="Reception">
+            <div class="overlay"><span class="overlay-label">Reception</span></div>
+        </div>
+        <div class="gallery-item" data-cat="portrait">
+            <img src="https://images.unsplash.com/photo-1522673607200-164d1b6ce486?w=600&auto=format&fit=crop" alt="Portrait">
+            <div class="overlay"><span class="overlay-label">Portrait</span></div>
+        </div>
+    </div>
+</div>
+
+<!-- ABOUT -->
+<div class="about-section">
+    <p class="section-eyebrow">Who We Are</p>
+    <h2>About Us</h2>
+    <p>We are a passionate team of photographers and cinematographers dedicated to capturing your most precious moments. With over 8 years of experience in Tamil Nadu wedding photography, we bring creativity, emotion, and artistry to every frame.</p>
+    <p>Our approach is simple — we tell your story the way it deserves to be told. Authentic, beautiful, and timeless.</p>
+</div>
+
+<!-- STATS -->
+<div class="stats">
+    <div class="stat-item"><h3>500+</h3><p>Weddings</p></div>
+    <div class="stat-item"><h3>8+</h3><p>Years</p></div>
+    <div class="stat-item"><h3>50K+</h3><p>Photos</p></div>
+</div>
+
+<!-- TESTIMONIALS -->
+<div class="testimonials">
+    <p class="section-eyebrow">Happy Couples</p>
+    <h2>What They Say</h2>
+    <div class="testimonial-grid">
+        <div class="t-card">
+            <div class="stars">★★★★★</div>
+            <p>"Dream Gallery captured our wedding beautifully. Every photo tells our story perfectly. We couldn't be happier!"</p>
+            <p class="t-name">— Priya &amp; Karthik</p>
+        </div>
+        <div class="t-card">
+            <div class="stars">★★★★★</div>
+            <p>"The team was so professional and made us feel comfortable throughout. The photos are absolutely stunning!"</p>
+            <p class="t-name">— Anitha &amp; Rajesh</p>
+        </div>
+        <div class="t-card">
+            <div class="stars">★★★★★</div>
+            <p>"Best decision we made for our wedding. The photos exceeded all our expectations. Truly magical work!"</p>
+            <p class="t-name">— Deepa &amp; Suresh</p>
+        </div>
+    </div>
+</div>
+
+<div class="spacer"></div>
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+    <ul>
+        <li><a href="/"><i class="ti ti-home"></i><span>Home</span></a></li>
+        <li><a href="/work" class="active"><i class="ti ti-movie"></i><span>Work</span></a></li>
+        <li><a href="/select"><i class="ti ti-photo"></i><span>Select</span></a></li>
+        <li><a href="/packages-page"><i class="ti ti-diamond"></i><span>Packages</span></a></li>
+        <li><a href="/contact"><i class="ti ti-phone"></i><span>Contact</span></a></li>
+    </ul>
+</nav>
+
+<script>
+document.querySelectorAll('.cat-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        const cat = this.dataset.cat;
+        document.querySelectorAll('.gallery-item').forEach(item => {
+            item.style.display = (cat === 'all' || item.dataset.cat === cat) ? 'block' : 'none';
+        });
+    });
+});
+document.addEventListener('contextmenu', e => e.preventDefault());
+document.addEventListener('keydown', e => {
+    if (e.key === 'PrintScreen' || (e.ctrlKey && ['s','u','p'].includes(e.key.toLowerCase())) || e.key === 'F12') e.preventDefault();
+});
+</script>
+</body>
+</html>

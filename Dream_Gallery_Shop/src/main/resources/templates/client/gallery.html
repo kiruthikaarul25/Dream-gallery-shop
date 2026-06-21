@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Gallery — Dream Gallery Photography</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@300;400;600&family=Raleway:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Raleway', sans-serif;
+            background: #080808;
+            color: #fff;
+            padding-bottom: 90px;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+
+        /* ── SCREENSHOT PROTECTION OVERLAY ── */
+        #ss-protect {
+            position: fixed;
+            inset: 0;
+            z-index: 999998;
+            pointer-events: none;
+            display: none;
+            background: #000;
+        }
+        body.ss-block #ss-protect {
+            display: block;
+        }
+
+        /* ── TILED WATERMARK OVERLAY ── */
+        #wm-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 999997;
+            pointer-events: none;
+            background-image: repeating-linear-gradient(
+                -45deg,
+                transparent,
+                transparent 80px,
+                rgba(212,175,55,0.04) 80px,
+                rgba(212,175,55,0.04) 81px
+            );
+        }
+        #wm-overlay::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='180'%3E%3Ctext x='50%25' y='50%25' dominant-baseline='middle' text-anchor='middle' font-family='Georgia%2Cserif' font-size='13' fill='rgba(212%2C175%2C55%2C0.13)' transform='rotate(-30 150 90)'%3E%C2%A9 Dream Gallery Photography%3C%2Ftext%3E%3C%2Fsvg%3E");
+            background-repeat: repeat;
+        }
+
+        /* ── SCREENSHOT: blur photos ── */
+        body.ss-block .photo-grid,
+        body.ss-block #lightbox-img {
+            filter: blur(25px) brightness(0.3);
+            transition: filter 0s;
+        }
+
+        /* ── WATERMARK OVERLAY on image cards ── */
+        .photo-card {
+            position: relative;
+        }
+        .photo-card::after {
+            content: '© Dream Gallery Photography';
+            position: absolute;
+            bottom: 40px;
+            left: 0; right: 0;
+            text-align: center;
+            font-family: 'Cinzel', serif;
+            font-size: 0.6rem;
+            color: rgba(212,175,55,0.35);
+            letter-spacing: 1px;
+            pointer-events: none;
+            z-index: 2;
+            white-space: nowrap;
+            overflow: hidden;
+        }
+
+        /* ── TOP BAR ── */
+        .top-bar {
+            position: sticky; top: 0; z-index: 100;
+            background: rgba(8,8,8,0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(212,175,55,0.15);
+            padding: 14px 20px;
+            display: flex; justify-content: space-between; align-items: center;
+            gap: 12px;
+        }
+        .top-bar-left h5 {
+            font-family: 'Cinzel', serif;
+            font-size: clamp(0.85rem, 2.5vw, 1.1rem);
+            font-weight: 400; color: #D4AF37; letter-spacing: 2px;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            max-width: 55vw;
+        }
+        .top-bar-left small {
+            font-size: 0.7rem; color: #555;
+            letter-spacing: 1.5px; text-transform: uppercase;
+        }
+        .selection-pill {
+            display: flex; align-items: center; gap: 7px;
+            background: rgba(212,175,55,0.08);
+            border: 1px solid rgba(212,175,55,0.25);
+            border-radius: 40px; padding: 6px 14px;
+            white-space: nowrap; flex-shrink: 0;
+        }
+        .selection-pill i { color: #D4AF37; font-size: 1rem; }
+        .selection-pill span {
+            font-family: 'Cinzel', serif;
+            font-size: 0.78rem; color: #D4AF37; letter-spacing: 1px;
+        }
+
+        /* ── ALBUM TITLE ── */
+        .album-header {
+            padding: 28px 20px 10px;
+            display: flex; align-items: center; gap: 10px;
+        }
+        .album-header i { color: #D4AF37; font-size: 1.2rem; }
+        .album-header h6 {
+            font-family: 'Cinzel', serif;
+            font-size: 0.82rem; font-weight: 400;
+            letter-spacing: 3px; text-transform: uppercase;
+        }
+        .album-header.selected-header h6 { color: #4caf50; }
+        .album-header.unselected-header h6 { color: #D4AF37; }
+        .album-divider {
+            height: 1px; margin: 0 20px;
+            background: linear-gradient(to right, rgba(212,175,55,0.3), transparent);
+        }
+
+        /* ── PHOTO GRID ── */
+        .photo-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 12px; padding: 14px 20px;
+        }
+        @media(max-width: 480px) {
+            .photo-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; padding: 10px 12px; }
+        }
+
+        .photo-card {
+            background: #0e0e0e;
+            border-radius: 14px; overflow: hidden;
+            border: 1px solid rgba(212,175,55,0.1);
+            transition: transform 0.3s, border-color 0.3s;
+        }
+        .photo-card:hover { transform: translateY(-4px); border-color: rgba(212,175,55,0.35); }
+        .photo-card.selected-card { border-color: #4caf50 !important; }
+
+        .photo-card img {
+            width: 100%; height: 160px; object-fit: cover;
+            display: block; cursor: pointer;
+            transition: opacity 0.25s;
+            pointer-events: auto;
+            user-select: none;
+            -webkit-user-drag: none;
+            -khtml-user-drag: none;
+            -moz-user-drag: none;
+            -o-user-drag: none;
+            -webkit-touch-callout: none;
+        }
+        @media(max-width: 480px) { .photo-card img { height: 130px; } }
+        .photo-card img:hover { opacity: 0.88; }
+
+        /* selected tick overlay */
+        .selected-tick {
+            position: absolute; top: 8px; right: 8px;
+            width: 24px; height: 24px; border-radius: 50%;
+            background: #4caf50;
+            display: none; align-items: center; justify-content: center;
+            z-index: 3;
+        }
+        .selected-tick i { color: #fff; font-size: 0.85rem; }
+        .selected-card .selected-tick { display: flex; }
+
+        .card-footer {
+            padding: 8px 10px;
+            display: flex; justify-content: flex-end; align-items: center;
+        }
+        .select-btn {
+            border: none; cursor: pointer;
+            font-family: 'Raleway', sans-serif;
+            font-size: 0.72rem; font-weight: 500;
+            letter-spacing: 1px; text-transform: uppercase;
+            padding: 5px 14px; border-radius: 30px;
+            transition: all 0.25s;
+        }
+        .btn-select {
+            background: rgba(212,175,55,0.1);
+            color: #D4AF37; border: 1px solid rgba(212,175,55,0.3);
+        }
+        .btn-select:hover { background: #D4AF37; color: #000; }
+        .btn-deselect {
+            background: rgba(76,175,80,0.12);
+            color: #4caf50; border: 1px solid rgba(76,175,80,0.3);
+        }
+        .btn-deselect:hover { background: #4caf50; color: #000; }
+
+        /* ── SUBMIT BAR ── */
+        .submit-bar {
+            position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+            background: rgba(8,8,8,0.95); backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(212,175,55,0.15);
+            padding: 12px 20px;
+            display: flex; justify-content: space-between; align-items: center; gap: 12px;
+        }
+        .submit-info {
+            font-size: 0.78rem; color: #555;
+            letter-spacing: 1px;
+        }
+        .submit-info strong { color: #D4AF37; font-family: 'Cinzel', serif; }
+        .submit-btn {
+            padding: 10px 28px;
+            background: #D4AF37; color: #000; border: none;
+            border-radius: 30px; cursor: pointer;
+            font-family: 'Cinzel', serif; font-size: 0.75rem;
+            font-weight: 600; letter-spacing: 2px; text-transform: uppercase;
+            transition: all 0.3s; white-space: nowrap; flex-shrink: 0;
+        }
+        .submit-btn:hover { background: #c49e2f; transform: scale(1.03); }
+
+        /* ── LIGHTBOX ── */
+        .lightbox {
+            display: none; position: fixed; inset: 0;
+            background: rgba(0,0,0,0.97); z-index: 9999;
+            justify-content: center; align-items: center; flex-direction: column;
+        }
+        .lightbox.active { display: flex; }
+        .lightbox img {
+            max-width: 94vw;
+            max-height: 88vh;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+            border-radius: 4px;
+            user-select: none;
+            -webkit-user-drag: none;
+            -webkit-touch-callout: none;
+            pointer-events: none;
+        }
+        .lb-close {
+            position: absolute; top: 16px; right: 20px;
+            background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 50%; width: 40px; height: 40px;
+            display: flex; align-items: center; justify-content: center;
+            color: #fff; font-size: 1.1rem; cursor: pointer; transition: all 0.25s;
+        }
+        .lb-close:hover { background: rgba(212,175,55,0.2); color: #D4AF37; }
+        .lb-nav {
+            position: absolute; top: 50%; transform: translateY(-50%);
+            background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 50%; width: 46px; height: 46px;
+            display: flex; align-items: center; justify-content: center;
+            color: #fff; font-size: 1.3rem; cursor: pointer; transition: all 0.25s;
+        }
+        .lb-nav:hover { background: rgba(212,175,55,0.18); color: #D4AF37; }
+        .lb-prev { left: 16px; }
+        .lb-next { right: 16px; }
+        .lb-counter {
+            margin-top: 14px; color: #555;
+            font-family: 'Cinzel', serif; font-size: 0.72rem; letter-spacing: 2px;
+        }
+
+        /* ── LIGHTBOX WATERMARK ── */
+        .lb-watermark {
+            position: absolute;
+            bottom: 80px;
+            left: 50%; transform: translateX(-50%);
+            font-family: 'Cinzel', serif;
+            font-size: 0.65rem;
+            color: rgba(212,175,55,0.3);
+            letter-spacing: 2px;
+            white-space: nowrap;
+            pointer-events: none;
+            z-index: 10000;
+        }
+
+        /* ── EMPTY STATE ── */
+        .empty-state {
+            text-align: center; padding: 60px 20px;
+            color: #333; font-family: 'Cinzel', serif;
+            font-size: 0.8rem; letter-spacing: 2px;
+        }
+        .empty-state i { font-size: 2.5rem; color: rgba(212,175,55,0.2); margin-bottom: 12px; display: block; }
+
+        /* ── PRINT: hide everything ── */
+        @media print {
+            body * { display: none !important; }
+            body::before {
+                content: 'These images are protected and cannot be printed.';
+                display: block !important;
+                font-size: 1.2rem;
+                text-align: center;
+                margin-top: 40%;
+                color: #000;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- SCREENSHOT PROTECTION OVERLAY -->
+<div id="ss-protect"></div>
+
+<!-- TILED WATERMARK OVERLAY -->
+<div id="wm-overlay"></div>
+
+<!-- TOP BAR -->
+<div class="top-bar">
+    <div class="top-bar-left">
+        <h5 th:text="${client.coupleName} + ' — Your Gallery'">Couple Name — Your Gallery</h5>
+        <small>Select your favourite photos</small>
+    </div>
+    <div class="selection-pill">
+        <i class="ti ti-heart"></i>
+        <span><span id="selectionCount" th:text="${selectionCount}">0</span> selected</span>
+    </div>
+</div>
+
+<!-- ALBUMS & PHOTOS -->
+<div th:each="album : ${albums}">
+
+    <!-- SELECTED PHOTOS -->
+    <div th:if="${!selectedPhotos[album.id].isEmpty()}">
+        <div class="album-header selected-header">
+            <i class="ti ti-circle-check"></i>
+            <h6 th:text="${album.title} + ' — Selected'">Album — Selected</h6>
+        </div>
+        <div class="album-divider"></div>
+        <div class="photo-grid">
+            <div class="photo-card selected-card"
+                 th:each="photo : ${selectedPhotos[album.id]}"
+                 th:id="'card-' + ${photo.id}">
+                <div class="selected-tick"><i class="ti ti-check"></i></div>
+                <img th:src="@{/gallery/photo/__${photo.id}__}"
+                     th:alt="${photo.filename}"
+                     th:data-full="@{/gallery/photo/__${photo.id}__}"
+                     onclick="openLightbox(this)"
+                     onerror="this.src='/images/placeholder.jpg'">
+                <div class="card-footer">
+                    <button class="select-btn btn-deselect"
+                            th:id="'badge-' + ${photo.id}"
+                            th:onclick="'togglePhoto(' + ${photo.id} + ', false, this)'">
+                        <i class="ti ti-x" style="font-size:0.75rem;vertical-align:-1px;margin-right:3px"></i>Remove
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- UNSELECTED PHOTOS -->
+    <div th:if="${!unselectedPhotos[album.id].isEmpty()}">
+        <div class="album-header unselected-header">
+            <i class="ti ti-folder"></i>
+            <h6 th:text="${album.title}">Album Title</h6>
+        </div>
+        <div class="album-divider"></div>
+        <div class="photo-grid">
+            <div class="photo-card"
+                 th:each="photo : ${unselectedPhotos[album.id]}"
+                 th:id="'card-' + ${photo.id}">
+                <div class="selected-tick"><i class="ti ti-check"></i></div>
+                <img th:src="@{/gallery/photo/__${photo.id}__}"
+                     th:alt="${photo.filename}"
+                     th:data-full="@{/gallery/photo/__${photo.id}__}"
+                     onclick="openLightbox(this)"
+                     onerror="this.src='/images/placeholder.jpg'">
+                <div class="card-footer">
+                    <button class="select-btn btn-select"
+                            th:id="'badge-' + ${photo.id}"
+                            th:onclick="'togglePhoto(' + ${photo.id} + ', true, this)'">
+                        <i class="ti ti-heart" style="font-size:0.75rem;vertical-align:-1px;margin-right:3px"></i>Select
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- SUBMIT BAR -->
+<div class="submit-bar">
+    <div class="submit-info">
+        <strong id="submitCount" th:text="${selectionCount}">0</strong> photos selected
+    </div>
+    <form th:action="@{/gallery/submit}" method="post">
+        <button type="submit" class="submit-btn">
+            <i class="ti ti-send" style="font-size:0.85rem;vertical-align:-1px;margin-right:6px"></i>
+            Submit
+        </button>
+    </form>
+</div>
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox" onclick="closeLightboxOutside(event)">
+    <button class="lb-close" onclick="closeLightbox()"><i class="ti ti-x"></i></button>
+    <button class="lb-nav lb-prev" onclick="changePhoto(-1)"><i class="ti ti-chevron-left"></i></button>
+    <img id="lightbox-img" src="" alt="">
+    <button class="lb-nav lb-next" onclick="changePhoto(1)"><i class="ti ti-chevron-right"></i></button>
+    <div class="lb-counter" id="lightbox-counter"></div>
+    <div class="lb-watermark">© Dream Gallery Photography — Personal Use Only</div>
+</div>
+
+<script>
+/* ══════════════════════════════════════════
+   PROTECTION LAYER
+══════════════════════════════════════════ */
+
+// 1. Block right-click everywhere
+document.addEventListener('contextmenu', e => e.preventDefault());
+
+// 2. Block keyboard shortcuts
+document.addEventListener('keydown', e => {
+    const blocked =
+        e.key === 'PrintScreen' ||
+        (e.ctrlKey && ['s','p','u','a'].includes(e.key.toLowerCase())) ||
+        e.key === 'F12' ||
+        (e.metaKey && ['s','p'].includes(e.key.toLowerCase()));
+
+    if (blocked) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (e.key === 'PrintScreen') {
+            flashBlock(600);
+        }
+    }
+
+    // Lightbox navigation
+    if (document.getElementById('lightbox').classList.contains('active')) {
+        if (e.key === 'ArrowRight') changePhoto(1);
+        if (e.key === 'ArrowLeft') changePhoto(-1);
+        if (e.key === 'Escape') closeLightbox();
+    }
+});
+
+// 3. Block drag on all images
+document.addEventListener('dragstart', e => {
+    if (e.target.tagName === 'IMG') e.preventDefault();
+});
+
+// 4. iOS long-press fallback
+document.addEventListener('touchstart', e => {
+    if (e.target.tagName === 'IMG') {
+        e.target._touchTimer = setTimeout(() => {}, 500);
+    }
+}, { passive: true });
+
+// 5. Flash black overlay + blur photos
+function flashBlock(ms = 600) {
+    document.body.classList.add('ss-block');
+    document.getElementById('ss-protect').style.display = 'block';
+    setTimeout(() => {
+        document.body.classList.remove('ss-block');
+        document.getElementById('ss-protect').style.display = 'none';
+    }, ms);
+}
+
+// 6. Tab switch / PrintScreen on Windows
+document.addEventListener('visibilitychange', () => {
+    if (document.hidden) flashBlock(800);
+});
+
+// 7. Window blur (PrintScreen causes momentary blur on Windows)
+window.addEventListener('blur', () => {
+    flashBlock(700);
+});
+
+// 8. Block inspect element shortcut
+document.addEventListener('keydown', e => {
+    if (e.key === 'F12' ||
+        (e.ctrlKey && e.shiftKey && ['i','j','c'].includes(e.key.toLowerCase())) ||
+        (e.metaKey && e.altKey && ['i','j','c'].includes(e.key.toLowerCase()))) {
+        e.preventDefault();
+    }
+});
+
+/* ══════════════════════════════════════════
+   GALLERY LOGIC
+══════════════════════════════════════════ */
+
+const csrfToken = '';
+const csrfHeader = 'X-CSRF-TOKEN';
+
+function togglePhoto(photoId, select, btn) {
+    const url = select ? `/gallery/select/${photoId}` : `/gallery/deselect/${photoId}`;
+    btn.disabled = true;
+    fetch(url, { method: 'POST', headers: { [csrfHeader]: csrfToken } })
+    .then(res => res.json())
+    .then(data => {
+        document.getElementById('selectionCount').textContent = data.count;
+        document.getElementById('submitCount').textContent = data.count;
+        const card = document.getElementById('card-' + photoId);
+        if (select) {
+            card.classList.add('selected-card');
+            btn.innerHTML = '<i class="ti ti-x" style="font-size:0.75rem;vertical-align:-1px;margin-right:3px"></i>Remove';
+            btn.classList.remove('btn-select'); btn.classList.add('btn-deselect');
+            btn.onclick = function() { togglePhoto(photoId, false, btn); };
+        } else {
+            card.classList.remove('selected-card');
+            btn.innerHTML = '<i class="ti ti-heart" style="font-size:0.75rem;vertical-align:-1px;margin-right:3px"></i>Select';
+            btn.classList.remove('btn-deselect'); btn.classList.add('btn-select');
+            btn.onclick = function() { togglePhoto(photoId, true, btn); };
+        }
+        btn.disabled = false;
+    })
+    .catch(() => { btn.disabled = false; });
+}
+
+let allPhotos = [], currentIndex = 0;
+document.addEventListener('DOMContentLoaded', () => {
+    allPhotos = Array.from(document.querySelectorAll('.photo-grid img'));
+});
+function openLightbox(imgEl) {
+    currentIndex = allPhotos.indexOf(imgEl);
+    showPhoto(currentIndex);
+    document.getElementById('lightbox').classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+function showPhoto(idx) {
+    const img = allPhotos[idx];
+    document.getElementById('lightbox-img').src = img.dataset.full || img.src;
+    document.getElementById('lightbox-counter').textContent = (idx + 1) + ' / ' + allPhotos.length;
+}
+function changePhoto(dir) {
+    currentIndex = (currentIndex + dir + allPhotos.length) % allPhotos.length;
+    showPhoto(currentIndex);
+}
+function closeLightbox() {
+    document.getElementById('lightbox').classList.remove('active');
+    document.body.style.overflow = '';
+}
+function closeLightboxOutside(e) {
+    if (e.target.id === 'lightbox') closeLightbox();
+}
+
+// ── BACK BUTTON FIX ──────────────────────────────
+// Replace history so login page never appears on Back press.
+// Browser Back from gallery goes to the page before login (e.g. /select).
+(function() {
+    if (window.history && window.history.replaceState) {
+        window.history.replaceState(null, '', '/gallery/view');
+    }
+})();
+</script>
+</body>
+</html>

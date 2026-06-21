@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Send Link — Dream Gallery Photography</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Raleway:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --gold: #c9a84c;
+            --gold-light: #e2c97e;
+            --gold-dim: rgba(201,168,76,0.15);
+            --bg: #080808;
+            --surface: #0e0e0e;
+            --surface2: #141414;
+            --surface3: #1a1a1a;
+            --border: rgba(201,168,76,0.2);
+            --text: #e8e0d0;
+            --text-muted: #7a7060;
+            --green: #25D366;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Raleway', sans-serif;
+            min-height: 100vh;
+        }
+
+        /* ── SIDEBAR ── */
+        .sidebar {
+            width: 240px;
+            min-height: 100vh;
+            background: var(--surface);
+            border-right: 1px solid var(--border);
+            padding: 28px 16px;
+            position: fixed;
+            top: 0; left: 0;
+            display: flex;
+            flex-direction: column;
+            z-index: 100;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar-brand {
+            font-family: 'Cinzel', serif;
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--gold);
+            letter-spacing: 0.12em;
+            padding: 0 8px 28px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sidebar-brand i { font-size: 18px; }
+
+        .sidebar a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            border-radius: 8px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+            letter-spacing: 0.04em;
+            margin-bottom: 2px;
+            transition: all 0.2s;
+        }
+
+        .sidebar a:hover { background: var(--gold-dim); color: var(--gold); }
+        .sidebar a.active { background: var(--gold-dim); color: var(--gold); border-left: 2px solid var(--gold); }
+
+        .sidebar-logout {
+            margin-top: auto;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
+        }
+
+        .sidebar-logout a { color: #c0392b !important; }
+        .sidebar-logout a:hover { background: rgba(192,57,43,0.1) !important; color: #e74c3c !important; }
+
+        /* ── HAMBURGER ── */
+        .hamburger {
+            display: none;
+            position: fixed;
+            top: 16px; left: 16px;
+            z-index: 200;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--gold);
+            width: 40px; height: 40px;
+            border-radius: 8px;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 20px;
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 99;
+        }
+
+        /* ── MAIN ── */
+        .main {
+            margin-left: 240px;
+            padding: 40px 36px;
+            min-height: 100vh;
+        }
+
+        /* ── BACK + TITLE ── */
+        .page-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 36px;
+        }
+
+        .btn-back {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--text-muted);
+            font-family: 'Raleway', sans-serif;
+            font-size: 13px;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+
+        .btn-back:hover { border-color: var(--gold); color: var(--gold); }
+
+        .page-title {
+            font-family: 'Cinzel', serif;
+            font-size: 20px;
+            font-weight: 600;
+            color: var(--gold);
+            letter-spacing: 0.08em;
+        }
+
+        /* ── CARD ── */
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            overflow: hidden;
+            max-width: 580px;
+        }
+
+        .card-top-bar {
+            height: 3px;
+            background: linear-gradient(90deg, var(--gold), transparent);
+        }
+
+        .card-body { padding: 28px 28px 32px; }
+
+        /* ── CLIENT LABEL ── */
+        .client-eyebrow {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.16em;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+
+        .client-name {
+            font-family: 'Cinzel', serif;
+            font-size: 22px;
+            color: var(--gold-light);
+            margin-bottom: 28px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .client-name i { font-size: 18px; color: var(--gold); }
+
+        /* ── DIVIDER ── */
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 24px 0;
+        }
+
+        .divider-line { flex: 1; height: 1px; background: var(--border); }
+        .divider-label {
+            font-size: 10px;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+        }
+
+        /* ── GALLERY LINK SECTION ── */
+        .section-label {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-label i { color: var(--gold); font-size: 14px; }
+
+        .link-row {
+            display: flex;
+            gap: 10px;
+            align-items: stretch;
+            margin-bottom: 24px;
+        }
+
+        .link-box {
+            flex: 1;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 13px 16px;
+            font-size: 13px;
+            word-break: break-all;
+            color: var(--text-muted);
+            font-family: 'Raleway', sans-serif;
+            line-height: 1.5;
+        }
+
+        .btn-copy {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 0 18px;
+            background: transparent;
+            border: 1px solid var(--gold);
+            color: var(--gold);
+            border-radius: 10px;
+            font-family: 'Raleway', sans-serif;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+
+        .btn-copy:hover { background: var(--gold); color: #000; }
+        .btn-copy.copied { background: #1a3a1a; border-color: #27ae60; color: #27ae60; }
+
+        /* ── ACTION BUTTONS ── */
+        .btn-whatsapp {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            padding: 14px;
+            background: transparent;
+            border: 1px solid var(--green);
+            color: var(--green);
+            border-radius: 10px;
+            font-family: 'Raleway', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+            letter-spacing: 0.04em;
+            transition: all 0.25s;
+            margin-bottom: 12px;
+        }
+
+        .btn-whatsapp:hover {
+            background: var(--green);
+            color: #fff;
+        }
+
+        .btn-whatsapp i { font-size: 18px; }
+
+        .instagram-box {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px 18px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .instagram-icon {
+            width: 40px; height: 40px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            color: #fff;
+            font-size: 20px;
+        }
+
+        .instagram-text { flex: 1; }
+        .instagram-text p {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 2px;
+        }
+
+        .instagram-text span {
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .btn-copy-sm {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 14px;
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text-muted);
+            border-radius: 8px;
+            font-family: 'Raleway', sans-serif;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+
+        .btn-copy-sm:hover { border-color: var(--gold); color: var(--gold); }
+
+        /* ── MOBILE ── */
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); }
+            .sidebar.open { transform: translateX(0); }
+            .sidebar-overlay.open { display: block; }
+            .hamburger { display: flex; }
+            .main { margin-left: 0; padding: 72px 18px 32px; }
+            .link-row { flex-direction: column; }
+            .btn-copy { padding: 13px; justify-content: center; }
+            .instagram-box { flex-wrap: wrap; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Hamburger -->
+<button class="hamburger" onclick="toggleSidebar()" aria-label="Menu">
+    <i class="ti ti-menu-2"></i>
+</button>
+<div class="sidebar-overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+<!-- Sidebar -->
+<div class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+        <i class="ti ti-camera"></i> DREAM GALLERY
+    </div>
+
+    <a th:href="@{/dashboard}" href="#"><i class="ti ti-home"></i> Dashboard</a>
+    <a th:href="@{/clients}" href="#" class="active"><i class="ti ti-users"></i> Clients</a>
+    <a th:href="@{/owner/packages}" href="#"><i class="ti ti-package"></i> Packages</a>
+    <a th:href="@{/owner/profile}" href="#"><i class="ti ti-user"></i> Profile</a>
+
+    <div class="sidebar-logout">
+        <a th:href="@{/logout}" href="#"><i class="ti ti-logout"></i> Logout</a>
+    </div>
+</div>
+
+<!-- Main -->
+<div class="main">
+
+    <div class="page-header">
+        <a th:href="@{/clients}" href="#" class="btn-back">
+            <i class="ti ti-arrow-left"></i> Back
+        </a>
+        <h1 class="page-title">Send Access Link</h1>
+    </div>
+
+    <div class="card">
+        <div class="card-top-bar"></div>
+        <div class="card-body">
+
+            <!-- Client name -->
+            <p class="client-eyebrow">Client</p>
+            <h2 class="client-name">
+                <i class="ti ti-heart"></i>
+                <span th:text="${client.coupleName}">Ravi &amp; Kavitha</span>
+            </h2>
+
+            <!-- Gallery link -->
+            <p class="section-label">
+                <i class="ti ti-link"></i> Gallery Link
+            </p>
+            <div class="link-row">
+                <div class="link-box" id="galleryLink" th:text="${link}">
+                    https://dreamgallery.in/gallery/view?token=abc123xyz
+                </div>
+                <button class="btn-copy" id="copyBtn" onclick="copyLink()">
+                    <i class="ti ti-copy" id="copyIcon"></i>
+                    <span id="copyText">Copy</span>
+                </button>
+            </div>
+
+            <!-- Divider -->
+            <div class="divider">
+                <div class="divider-line"></div>
+                <span class="divider-label">Share via</span>
+                <div class="divider-line"></div>
+            </div>
+
+            <!-- WhatsApp -->
+            <a th:href="${whatsappUrl}" href="#" target="_blank" class="btn-whatsapp">
+                <i class="ti ti-brand-whatsapp"></i>
+                Send via WhatsApp
+            </a>
+
+            <!-- Instagram -->
+            <div class="instagram-box">
+                <div class="instagram-icon">
+                    <i class="ti ti-brand-instagram"></i>
+                </div>
+                <div class="instagram-text">
+                    <p>Send via Instagram</p>
+                    <span>Copy the link and paste in Instagram DM</span>
+                </div>
+                <button class="btn-copy-sm" onclick="copyLinkSm(this)">
+                    <i class="ti ti-copy"></i> Copy
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+<script>
+function copyLink() {
+    const text = document.getElementById('galleryLink').textContent.trim();
+    navigator.clipboard.writeText(text).then(() => {
+        const btn = document.getElementById('copyBtn');
+        const icon = document.getElementById('copyIcon');
+        const label = document.getElementById('copyText');
+        btn.classList.add('copied');
+        icon.className = 'ti ti-check';
+        label.textContent = 'Copied!';
+        setTimeout(() => {
+            btn.classList.remove('copied');
+            icon.className = 'ti ti-copy';
+            label.textContent = 'Copy';
+        }, 2500);
+    });
+}
+
+function copyLinkSm(btn) {
+    const text = document.getElementById('galleryLink').textContent.trim();
+    navigator.clipboard.writeText(text).then(() => {
+        const orig = btn.innerHTML;
+        btn.innerHTML = '<i class="ti ti-check"></i> Copied!';
+        btn.style.color = '#27ae60';
+        btn.style.borderColor = '#27ae60';
+        setTimeout(() => {
+            btn.innerHTML = orig;
+            btn.style.color = '';
+            btn.style.borderColor = '';
+        }, 2500);
+    });
+}
+
+function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('overlay').classList.toggle('open');
+}
+</script>
+</body>
+</html>

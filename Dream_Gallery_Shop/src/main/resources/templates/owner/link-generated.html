@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Link Generated — Dream Gallery Photography</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@300;400;600&family=Raleway:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Raleway',sans-serif;background:#080808;color:#fff;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;position:relative;overflow:hidden}
+        body::before{content:'';position:fixed;inset:0;background:url('https://images.unsplash.com/photo-1519741497674-611481863552?w=1200&auto=format&fit=crop') center/cover no-repeat;opacity:0.04;pointer-events:none}
+
+        .wrap{width:100%;max-width:480px;position:relative;z-index:1;text-align:center}
+
+        /* ICON RING */
+        .success-ring{width:80px;height:80px;border-radius:50%;border:1px solid rgba(212,175,55,0.3);display:flex;align-items:center;justify-content:center;margin:0 auto 28px;background:rgba(212,175,55,0.06);animation:ringPulse 2.5s ease-in-out infinite}
+        @keyframes ringPulse{0%,100%{box-shadow:0 0 0 0 rgba(212,175,55,0.15)}50%{box-shadow:0 0 0 14px rgba(212,175,55,0)}}
+        .success-ring i{color:#D4AF37;font-size:2.2rem}
+
+        .eyebrow{font-size:0.65rem;letter-spacing:5px;text-transform:uppercase;color:#D4AF37;margin-bottom:10px}
+        .title{font-family:'Cinzel',serif;font-size:clamp(1.5rem,4vw,2rem);font-weight:300;letter-spacing:4px;color:#fff;margin-bottom:8px}
+        .title span{color:#D4AF37}
+        .gold-line{width:50px;height:1px;background:linear-gradient(to right,transparent,#D4AF37,transparent);margin:0 auto 16px}
+        .subtitle{color:#444;font-size:0.85rem;font-weight:300;line-height:1.8;margin-bottom:28px}
+        .subtitle strong{color:#D4AF37;font-family:'Cinzel',serif}
+
+        /* CARD */
+        .card{background:#0e0e0e;border:1px solid rgba(212,175,55,0.15);border-radius:20px;padding:28px;margin-bottom:20px;position:relative;overflow:hidden;text-align:left}
+        .card::before{content:'';position:absolute;top:0;left:20%;right:20%;height:1px;background:linear-gradient(to right,transparent,#D4AF37,transparent)}
+
+        .card-label{font-size:0.65rem;letter-spacing:3px;text-transform:uppercase;color:#333;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+        .card-label i{color:#D4AF37;font-size:0.85rem}
+
+        /* LINK BOX */
+        .link-box{background:#080808;border:1px solid rgba(212,175,55,0.12);border-radius:12px;padding:14px 16px;font-size:0.78rem;word-break:break-all;color:#555;font-family:'Raleway',sans-serif;font-weight:300;line-height:1.6;margin-bottom:14px;transition:border-color 0.3s}
+        .link-box:hover{border-color:rgba(212,175,55,0.25)}
+
+        /* COPY BTN */
+        .btn-copy{width:100%;padding:11px;background:transparent;border:1px solid rgba(212,175,55,0.25);color:#D4AF37;border-radius:40px;cursor:pointer;font-family:'Cinzel',serif;font-size:0.72rem;letter-spacing:2px;text-transform:uppercase;display:flex;align-items:center;justify-content:center;gap:7px;transition:all 0.3s}
+        .btn-copy:hover{background:rgba(212,175,55,0.08);border-color:rgba(212,175,55,0.5)}
+        .btn-copy i{font-size:0.95rem}
+        .btn-copy.copied{color:#4caf50;border-color:rgba(76,175,80,0.4)}
+
+        /* ACTION BUTTONS */
+        .actions{display:flex;flex-direction:column;gap:12px}
+        .btn-wa{display:flex;align-items:center;justify-content:center;gap:9px;padding:14px;background:rgba(37,211,102,0.08);border:1px solid rgba(37,211,102,0.25);color:#25D366;border-radius:40px;text-decoration:none;font-family:'Cinzel',serif;font-size:0.75rem;letter-spacing:2px;text-transform:uppercase;transition:all 0.3s}
+        .btn-wa:hover{background:rgba(37,211,102,0.15);border-color:rgba(37,211,102,0.5)}
+        .btn-wa i{font-size:1.1rem}
+        .btn-back{display:flex;align-items:center;justify-content:center;gap:8px;padding:13px;background:transparent;border:1px solid rgba(212,175,55,0.25);color:#555;border-radius:40px;text-decoration:none;font-family:'Cinzel',serif;font-size:0.72rem;letter-spacing:2px;text-transform:uppercase;transition:all 0.3s}
+        .btn-back:hover{color:#D4AF37;border-color:rgba(212,175,55,0.5)}
+        .btn-back i{font-size:0.95rem}
+    </style>
+</head>
+<body>
+
+<div class="wrap">
+
+    <div class="success-ring"><i class="ti ti-link"></i></div>
+
+    <p class="eyebrow">Dream Gallery Photography</p>
+    <h1 class="title">Link <span>Generated!</span></h1>
+    <div class="gold-line"></div>
+    <p class="subtitle">
+        Share this link with <strong th:text="${client.coupleName}">Couple Name</strong>
+    </p>
+
+    <!-- LINK CARD -->
+    <div class="card">
+        <p class="card-label"><i class="ti ti-link"></i>Gallery Link</p>
+        <div class="link-box" id="theLink" th:text="${link}">https://example.com/gallery/abc123</div>
+        <button class="btn-copy" onclick="copyLink()" id="copyBtn">
+            <i class="ti ti-copy" id="copyIcon"></i>
+            <span id="copyText">Copy Link</span>
+        </button>
+    </div>
+
+    <!-- ACTIONS -->
+    <div class="actions">
+        <a th:href="${'https://wa.me/' + client.phone + '?text=Hi+' + client.coupleName + '+Your+photos+are+ready:+' + link}"
+           target="_blank" class="btn-wa">
+            <i class="ti ti-brand-whatsapp"></i>Send via WhatsApp
+        </a>
+        <a th:href="@{/clients}" class="btn-back">
+            <i class="ti ti-arrow-left"></i>Back to Clients
+        </a>
+    </div>
+
+</div>
+
+<script>
+function copyLink() {
+    const text = document.getElementById('theLink').textContent.trim();
+    const btn = document.getElementById('copyBtn');
+    const icon = document.getElementById('copyIcon');
+    const label = document.getElementById('copyText');
+    navigator.clipboard.writeText(text).then(() => {
+        btn.classList.add('copied');
+        icon.className = 'ti ti-circle-check';
+        label.textContent = 'Copied!';
+        setTimeout(() => {
+            btn.classList.remove('copied');
+            icon.className = 'ti ti-copy';
+            label.textContent = 'Copy Link';
+        }, 2500);
+    });
+}
+</script>
+</body>
+</html>

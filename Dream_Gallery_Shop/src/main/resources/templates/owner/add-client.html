@@ -12,7 +12,7 @@
         body {
             font-family: 'Raleway', sans-serif;
             background: #080808; color: #fff;
-            min-height: 100vh; display: flex;
+            min-height: 100vh;
         }
 
         /* ── SIDEBAR ── */
@@ -24,6 +24,7 @@
             position: fixed; top: 0; left: 0; bottom: 0;
             display: flex; flex-direction: column;
             z-index: 50;
+            overflow-y: auto;
         }
         .sidebar-brand {
             padding: 0 8px 28px;
@@ -34,10 +35,12 @@
             font-family: 'Cinzel', serif;
             font-size: 1rem; font-weight: 400;
             letter-spacing: 3px; color: #D4AF37;
+            white-space: nowrap;
         }
         .sidebar-brand p {
             font-size: 0.6rem; letter-spacing: 3px;
             text-transform: uppercase; color: #333; margin-top: 3px;
+            white-space: nowrap;
         }
 
         .nav-item {
@@ -48,6 +51,7 @@
             text-transform: uppercase; margin-bottom: 4px;
             transition: all 0.25s;
             border: 1px solid transparent;
+            white-space: nowrap;
         }
         .nav-item i { font-size: 1.05rem; flex-shrink: 0; }
         .nav-item:hover { color: #D4AF37; background: rgba(212,175,55,0.05); border-color: rgba(212,175,55,0.1); }
@@ -64,11 +68,13 @@
             background: rgba(8,8,8,0.95); backdrop-filter: blur(16px);
             border-bottom: 1px solid rgba(212,175,55,0.1);
             padding: 14px 18px;
-            align-items: center; justify-content: space-between;
+            align-items: center; justify-content: flex-start;
+            gap: 14px;
         }
         .mob-header h2 {
             font-family: 'Cinzel', serif; font-size: 0.9rem;
             font-weight: 400; letter-spacing: 3px; color: #D4AF37;
+            white-space: nowrap;
         }
         .mob-menu-btn {
             background: none; border: 1px solid rgba(212,175,55,0.2);
@@ -76,24 +82,44 @@
             width: 36px; height: 36px;
             display: flex; align-items: center; justify-content: center;
             cursor: pointer; font-size: 1.1rem;
+            flex-shrink: 0;
         }
+
+        /* overlay shown behind the sidebar on mobile when it's open,
+           so the page content underneath doesn't shift/overlap weirdly */
+        .sidebar-overlay {
+            display: none;
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.55);
+            z-index: 45;
+        }
+        .sidebar-overlay.show { display: block; }
+
         @media(max-width:768px) {
-            .sidebar { transform: translateX(-100%); transition: transform 0.3s; }
+            .sidebar {
+                width: 240px;
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
             .sidebar.open { transform: translateX(0); }
             .mob-header { display: flex; }
             .main { margin-left: 0 !important; }
+            body.sidebar-locked { overflow: hidden; }
         }
 
         /* ── MAIN ── */
         .main {
             margin-left: 220px; flex: 1;
             padding: 36px 28px; min-height: 100vh;
+            width: 100%;
+            min-width: 0;
         }
         @media(max-width:900px) { .main { padding: 24px 16px; } }
 
         /* PAGE HEADER */
         .page-top {
             display: flex; align-items: center; gap: 14px; margin-bottom: 32px;
+            flex-wrap: wrap;
         }
         .back-btn {
             display: flex; align-items: center; gap: 6px;
@@ -102,6 +128,7 @@
             color: #555; text-decoration: none;
             font-size: 0.72rem; letter-spacing: 1.5px;
             text-transform: uppercase; transition: all 0.25s;
+            white-space: nowrap;
         }
         .back-btn:hover { color: #D4AF37; border-color: rgba(212,175,55,0.4); }
         .back-btn i { font-size: 0.9rem; }
@@ -110,6 +137,9 @@
             font-family: 'Cinzel', serif;
             font-size: 1.2rem; font-weight: 300;
             letter-spacing: 3px; color: #fff;
+        }
+        @media(max-width:480px) {
+            .page-top h4 { font-size: 1rem; letter-spacing: 2px; }
         }
 
         /* FORM CARD */
@@ -193,16 +223,20 @@
         .btn-submit:hover { background: #D4AF37; color: #000; border-color: #D4AF37; }
         .btn-submit i { font-size: 1rem; }
     </style>
+<link rel="stylesheet" href="/css/site-nav.css">
 </head>
 <body>
 
 <!-- MOBILE HEADER -->
 <div class="mob-header">
-    <h2>Dream Gallery</h2>
-    <button class="mob-menu-btn" onclick="document.querySelector('.sidebar').classList.toggle('open')">
+    <button class="mob-menu-btn" onclick="toggleSidebar()">
         <i class="ti ti-menu-2"></i>
     </button>
+    <h2>Dream Gallery</h2>
 </div>
+
+<!-- OVERLAY (mobile only, closes sidebar on tap-outside) -->
+<div class="sidebar-overlay" onclick="toggleSidebar()"></div>
 
 <!-- SIDEBAR -->
 <nav class="sidebar">
@@ -212,9 +246,11 @@
     </div>
     <a th:href="@{/dashboard}" class="nav-item"><i class="ti ti-layout-dashboard"></i>Dashboard</a>
     <a th:href="@{/clients}" class="nav-item active"><i class="ti ti-users"></i>Clients</a>
-    <a th:href="@{/orders}" class="nav-item"><i class="ti ti-receipt"></i>Orders</a>
+
     <a th:href="@{/owner/profile}" class="nav-item"><i class="ti ti-user-circle"></i>Profile</a>
-    <div class="sidebar-spacer"></div>
+	<a th:href="@{/owner/packages}" class="nav-item"><i class="ti ti-diamond"></i>Packages</a>
+	<div class="sidebar-spacer"></div>
+	
     <a th:href="@{/logout}" class="nav-item danger"><i class="ti ti-logout"></i>Logout</a>
 </nav>
 
@@ -293,5 +329,25 @@
     </div>
 </div>
 
+<script>
+    function toggleSidebar() {
+        document.querySelector('.sidebar').classList.toggle('open');
+        document.querySelector('.sidebar-overlay').classList.toggle('show');
+        document.body.classList.toggle('sidebar-locked');
+    }
+</script>
+
+
+<nav class="bottom-nav">
+    <ul>
+        <li><a href="/"><i class="ti ti-home"></i><span>Home</span></a></li>
+        <li><a href="/work"><i class="ti ti-video"></i><span>Work</span></a></li>
+        <li><a href="/select"><i class="ti ti-photo"></i><span>Select</span></a></li>
+        <li><a href="/packages-page"><i class="ti ti-diamond"></i><span>Packages</span></a></li>
+        <li><a href="/contact"><i class="ti ti-phone"></i><span>Contact</span></a></li>
+    </ul>
+</nav>
+
+<script src="/js/constants.js"></script>
 </body>
 </html>

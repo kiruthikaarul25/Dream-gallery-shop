@@ -1,0 +1,90 @@
+/* ===== Bottom Navigation (for pages without their own inline nav styling) ===== */
+.bottom-nav {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    z-index: 200;
+    background: rgba(8,8,8,0.92);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid rgba(212,175,55,0.15);
+    padding: 10px 0 max(10px, env(safe-area-inset-bottom));
+}
+
+.bottom-nav ul {
+    display: flex;
+    justify-content: space-around;
+    list-style: none;
+    max-width: 500px;
+    margin: 0 auto;
+    padding: 0;
+}
+
+.bottom-nav ul li a {
+    display: flex; flex-direction: column;
+    align-items: center; gap: 4px;
+    text-decoration: none;
+    color: #aaa;
+    font-family: 'Cinzel', serif, Arial, sans-serif;
+    font-size: 8px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    transition: color 0.3s;
+    padding: 4px 8px;
+}
+
+.bottom-nav ul li a i { font-size: 20px; transition: transform 0.3s; }
+.bottom-nav ul li a:hover i { transform: translateY(-3px); }
+.bottom-nav ul li a:hover,
+.bottom-nav ul li a.active { color: #D4AF37; }
+
+/* Push page content above the fixed bottom-nav so it doesn't get hidden behind it */
+body { padding-bottom: 70px; }
+
+/* ===== Floating WhatsApp & Instagram Icons ===== */
+.floating-social {
+    position: fixed;
+    right: 18px;
+    bottom: 90px; /* sits above bottom-nav */
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    z-index: 999;
+}
+
+.floating-social a {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 24px;
+    text-decoration: none;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.floating-social a:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
+}
+
+.floating-social .whatsapp-btn {
+    background-color: #25D366;
+}
+
+.floating-social .instagram-btn {
+    background: radial-gradient(circle at 30% 107%,
+        #fdf497 0%, #fdf497 5%,
+        #fd5949 45%, #d6249f 60%,
+        #285AEB 90%);
+}
+
+/* On larger screens, lift slightly higher so it doesn't overlap content */
+@media (min-width: 768px) {
+    .floating-social {
+        bottom: 100px;
+        right: 30px;
+    }
+}

@@ -6,6 +6,7 @@
   <title>Contact — Dream Gallery Photography</title>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@300;400;600&family=Raleway:wght@300;400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+  <link rel="stylesheet" href="/css/site-nav.css">
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -230,7 +231,7 @@
   <span class="dg-hero-tag">Dream Gallery Photography</span>
   <h1>Let's capture<br>your <span>story</span></h1>
   <div class="dg-gold-line"></div>
-  <p>Chennai &nbsp;·&nbsp; Tamil Nadu</p>
+  <p id="dg-location">Chennai &nbsp;·&nbsp; Tamil Nadu</p>
 </div>
 
 <div class="dg-grid">
@@ -239,8 +240,8 @@
     <div class="dg-card-icon"><i class="ti ti-phone"></i></div>
     <div class="dg-card-label">Call us</div>
     <div class="dg-card-value">
-      <a href="tel:+919876543210">+91 98765 43210</a><br>
-      <a href="tel:+919876543211">+91 98765 43211</a>
+      <a id="dg-phone-1" href="tel:+919876543210">+91 98765 43210</a><br>
+      <a id="dg-phone-2" href="tel:+919876543211">+91 98765 43211</a>
     </div>
   </div>
 
@@ -249,7 +250,7 @@
     <div class="dg-card-icon"><i class="ti ti-mail"></i></div>
     <div class="dg-card-label">Write to us</div>
     <div class="dg-card-value">
-      <a href="mailto:hello@dreamgallery.in">hello@dreamgallery.in</a>
+      <a id="dg-email" href="mailto:hello@dreamgallery.in">hello@dreamgallery.in</a>
     </div>
   </div>
 
@@ -258,7 +259,7 @@
     <div class="dg-card-icon"><i class="ti ti-map-pin"></i></div>
     <div class="dg-card-label">Studio</div>
     <div class="dg-card-value">
-      123, Anna Nagar Main Road<br>Chennai — 600040
+      <span id="dg-address">123, Anna Nagar Main Road, Chennai — 600040</span>
     </div>
   </div>
 
@@ -267,16 +268,19 @@
     <div class="dg-card-icon"><i class="ti ti-clock"></i></div>
     <div class="dg-card-label">Hours</div>
     <div class="dg-card-value">
-      Mon – Sat &nbsp;10 AM – 7 PM<br>
-      <span style="color:#555;font-size:.88rem">Sunday by appointment</span>
+      <span id="dg-hours">Mon – Sat &nbsp;10 AM – 7 PM</span><br>
+      <span id="dg-hours-note" style="color:#555;font-size:.88rem">Sunday by appointment</span>
     </div>
   </div>
 </div>
 
 <div class="spacer"></div>
 
+
+
 <nav class="bottom-nav">
   <ul>
+    <li><a href="/"><i class="ti ti-home"></i><span>Home</span></a></li>
     <li><a href="/work"><i class="ti ti-video"></i><span>Work</span></a></li>
     <li><a href="/select"><i class="ti ti-photo"></i><span>Select</span></a></li>
     <li><a href="/packages-page"><i class="ti ti-diamond"></i><span>Packages</span></a></li>
@@ -300,5 +304,6 @@ document.querySelectorAll('.dg-card').forEach(card => {
   card.addEventListener('mouseleave', () => { card.style.transform = ''; });
 });
 </script>
+<script src="/js/constants.js"></script>
 </body>
 </html>
